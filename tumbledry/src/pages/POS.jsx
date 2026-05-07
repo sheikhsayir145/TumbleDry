@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useStore } from '../store/index.js'
 import { GARMENT_CATEGORIES, GARMENT_RATES, SERVICES, SERVICE_KG_RATES, isKgService, getNextTag, calcDeliveryDate } from '../lib/garments.js'
-import { printReceipt, printTags } from '../lib/print.js'
+import { printReceipt, printTags, printTagsInWindow, printReceiptInWindow } from '../lib/print.js'
 
 // Use custom rates if set in rate card editor, else fall back to defaults
 function getActiveRates() {
@@ -141,10 +141,16 @@ export default function POS() {
     }
     try {
       await upsertOrder(order)
-      // Auto-print tags immediately, then receipt, then WhatsApp
-      printTags(order)
-      setTimeout(() => printReceipt(order), 800)
-      setTimeout(() => sendWhatsApp(order), 1600)
+      // Open both print windows immediately (must be in same call stack as user click)
+      // then write content — browser allows window.open only during user gesture
+      const tagsWin    = window.open('', '_blank', 'width=700,height=500')
+      const receiptWin = window.open('', '_blank', 'width=300,height=600')
+      // Write tags
+      printTagsInWindow(tagsWin, order)
+      // Write receipt
+      printReceiptInWindow(receiptWin, order)
+      // WhatsApp after short delay
+      setTimeout(() => sendWhatsApp(order), 600)
       clearCart(); setCustomer({name:'',number:'',address:'',city:'',pincode:''}); setOrderDiscount(0)
       setTagNumber(getNextTag([...orders, order])); setDeliveryDate(calcDeliveryDate())
       showToast('✅ Order saved! Printing tags & receipt...')
