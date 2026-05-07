@@ -77,10 +77,21 @@ export default function Reports() {
 
       if (orders.length === 0) throw new Error('No valid orders found in CSV')
 
-      // Send to Neon in one batch
-      await api.orders.replaceAll(orders)
+      // Step 1: Clear existing orders
+      await api.orders.clearAll()
 
-      // Refresh store
+      // Step 2: Insert in batches of 50 to avoid timeout
+      const BATCH_SIZE = 50
+      let imported = 0
+      for (let i = 0; i < orders.length; i += BATCH_SIZE) {
+        const batch = orders.slice(i, i + BATCH_SIZE)
+        await api.orders.insertBatch(batch)
+        imported += batch.length
+        // Update progress
+        setImportResult({ success: null, count: imported, total: orders.length })
+      }
+
+      // Step 3: Refresh store
       await fetchOrders()
 
       setImportResult({ success: true, count: orders.length })
@@ -293,10 +304,16 @@ export default function Reports() {
           </label>
 
           {importResult && (
-            <div style={{marginTop:14, padding:'12px 14px', borderRadius:8, background: importResult.success ? 'rgba(16,185,129,0.08)' : 'rgba(244,63,94,0.08)', border: `1px solid ${importResult.success ? 'rgba(16,185,129,0.2)' : 'rgba(244,63,94,0.2)'}`, fontSize:13, color: importResult.success ? 'var(--emerald)' : 'var(--rose)'}}>
-              {importResult.success
+            <div style={{marginTop:14, padding:'12px 14px', borderRadius:8,
+              background: importResult.success === true ? 'rgba(16,185,129,0.08)' : importResult.success === false ? 'rgba(244,63,94,0.08)' : 'rgba(99,102,241,0.08)',
+              border: `1px solid ${importResult.success === true ? 'rgba(16,185,129,0.2)' : importResult.success === false ? 'rgba(244,63,94,0.2)' : 'rgba(99,102,241,0.2)'}`,
+              fontSize:13,
+              color: importResult.success === true ? 'var(--emerald)' : importResult.success === false ? 'var(--rose)' : 'var(--indigo)'}}>
+              {importResult.success === true
                 ? `✅ ${importResult.count} orders imported successfully`
-                : `❌ Error: ${importResult.error}`}
+                : importResult.success === false
+                ? `❌ Error: ${importResult.error}`
+                : `⏳ Importing... ${importResult.count} / ${importResult.total} orders`}
             </div>
           )}
 

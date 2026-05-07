@@ -21,9 +21,10 @@ async function request(path, options = {}) {
 // ── Orders ────────────────────────────────────────────────────
 export const api = {
   orders: {
-    getAll: ()             => request('/orders'),
-    upsert: (order)        => request('/orders', { method: 'POST', body: JSON.stringify({ order }) }),
-    replaceAll: (orders)   => request('/orders', { method: 'POST', body: JSON.stringify({ action: 'REPLACE_ALL', orders }) }),
+    getAll:      ()        => request('/orders'),
+    upsert:      (order)   => request('/orders', { method: 'POST', body: JSON.stringify({ order }) }),
+    clearAll:    ()        => request('/orders', { method: 'POST', body: JSON.stringify({ action: 'CLEAR_ALL' }) }),
+    insertBatch: (orders)  => request('/orders', { method: 'POST', body: JSON.stringify({ action: 'INSERT_BATCH', orders }) }),
   },
   attendance: {
     getAll: ()             => request('/attendance'),

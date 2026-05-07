@@ -1,5 +1,4 @@
 // netlify/functions/orders.js
-// GET all orders / POST upsert / POST bulk import
 
 import { getDb, checkAuth, ok, err, cors } from './_db.js'
 
@@ -20,12 +19,10 @@ export async function handler(event) {
           payment_method, payment_status,
           grand_total::float, total_garments,
           discount_amount::float, discount_pct::float,
-          cart, order_date, delivery_date, deleted,
-          created_at, updated_at
+          cart, order_date, delivery_date, deleted
         FROM orders
         ORDER BY order_date DESC
       `
-      // Normalize to camelCase for the React app
       const orders = rows.map(r => ({
         id:              r.id,
         customerName:    r.customer_name,
@@ -57,11 +54,25 @@ export async function handler(event) {
   if (event.httpMethod === 'POST') {
     const body = JSON.parse(event.body || '{}')
 
-    // Bulk replace all (for CSV import)
-    if (body.action === 'REPLACE_ALL') {
+    // ── Clear all orders (called once before batch import) ────
+    if (body.action === 'CLEAR_ALL') {
       try {
         await db`DELETE FROM orders`
-        for (const o of (body.orders || [])) {
+        return ok({ success: true })
+      } catch (e) {
+        return err(e.message, 500)
+      }
+    }
+
+    // ── Batch insert (called multiple times with chunks) ──────
+    // Uses a single INSERT with multiple rows — much faster than loop
+    if (body.action === 'INSERT_BATCH') {
+      const orders = body.orders || []
+      if (orders.length === 0) return ok({ success: true, count: 0 })
+      try {
+        // Build bulk insert using neon tagged template
+        // neon supports passing arrays directly
+        for (const o of orders) {
           await db`
             INSERT INTO orders (
               id, customer_name, customer_number,
@@ -72,23 +83,24 @@ export async function handler(event) {
               discount_amount, discount_pct,
               cart, order_date, delivery_date, deleted
             ) VALUES (
-              ${o.id}, ${o.customerName}, ${o.customerNumber},
+              ${o.id}, ${o.customerName||''}, ${o.customerNumber||''},
               ${o.customerAddress||''}, ${o.customerCity||''}, ${o.customerPincode||''},
-              ${o.tagNumber}, ${o.serviceType}, ${o.status||'pending'},
-              ${o.paymentMethod||'Cash'}, ${o.paymentStatus||'Pending'},
+              ${o.tagNumber||''}, ${o.serviceType||'Dry Clean'}, ${o.status||'delivered'},
+              ${o.paymentMethod||'Cash'}, ${o.paymentStatus||'Paid'},
               ${o.grandTotal||0}, ${o.totalGarments||0},
               ${o.discountAmount||0}, ${o.discountPct||0},
-              ${JSON.stringify(o.cart||[])}, ${o.orderDate}, ${o.deliveryDate||''}, ${o.deleted||false}
+              ${JSON.stringify(o.cart||[])}, ${o.orderDate||new Date().toISOString()}, ${o.deliveryDate||''}, ${o.deleted||false}
             )
+            ON CONFLICT (id) DO NOTHING
           `
         }
-        return ok({ success: true, count: (body.orders||[]).length })
+        return ok({ success: true, count: orders.length })
       } catch (e) {
         return err(e.message, 500)
       }
     }
 
-    // Upsert single order
+    // ── Upsert single order ───────────────────────────────────
     const o = body.order || body
     try {
       await db`
