@@ -50,8 +50,8 @@
   --transition: all 0.2s var(--ease-out);
 }
 
-/* Dark Mode */
-.dark {
+/* Dark Mode — applied to html element */
+html.dark {
   --bg-base:    #0c1120;
   --bg-card:    #131c2e;
   --bg-raised:  #1a2438;
@@ -71,7 +71,12 @@
   --shadow-xl: 0 20px 60px rgba(0,0,0,0.4);
 }
 
-html { height: 100%; }
+html {
+  height: 100%;
+  background: var(--bg-base);
+  color: var(--tx-primary);
+  transition: background 0.3s, color 0.3s;
+}
 
 body {
   font-family: 'DM Sans', -apple-system, sans-serif;
@@ -124,3 +129,5 @@ body {
 .animate-fade-up  { animation: fadeUp  0.4s var(--ease-out) both; }
 .animate-fade-in  { animation: fadeIn  0.3s ease both; }
 .animate-pulse    { animation: pulse 2s ease infinite; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
