@@ -30,8 +30,7 @@ export default function Reports() {
 
     try {
       const text = await file.text()
-      const lines = text.split('
-').filter(l => l.trim())
+      const lines = text.split('\n').filter(l => l.trim())
       const headers = lines[0].split(',').map(h => h.replace(/"/g,'').trim())
 
       const orders = []
