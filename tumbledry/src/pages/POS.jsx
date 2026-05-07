@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useStore } from '../store/index.js'
 import { GARMENT_CATEGORIES, GARMENT_RATES, SERVICES, SERVICE_KG_RATES, isKgService, getNextTag, calcDeliveryDate } from '../lib/garments.js'
+import { printReceipt, printTags } from '../lib/print.js'
 
 // Use custom rates if set in rate card editor, else fall back to defaults
 function getActiveRates() {
@@ -140,10 +141,13 @@ export default function POS() {
     }
     try {
       await upsertOrder(order)
-      sendWhatsApp(order)
+      // Auto-print tags immediately, then receipt, then WhatsApp
+      printTags(order)
+      setTimeout(() => printReceipt(order), 800)
+      setTimeout(() => sendWhatsApp(order), 1600)
       clearCart(); setCustomer({name:'',number:'',address:'',city:'',pincode:''}); setOrderDiscount(0)
       setTagNumber(getNextTag([...orders, order])); setDeliveryDate(calcDeliveryDate())
-      showToast('✅ Order saved!')
+      showToast('✅ Order saved! Printing tags & receipt...')
     } catch(e) { showToast('❌ ' + e.message) }
   }
 

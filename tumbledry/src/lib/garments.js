@@ -139,8 +139,8 @@ export const SERVICE_KG_RATES = {
   'Dry Clean':           0,    // piece billing only
   'Steam Iron':          0,    // piece billing only
   'Premium Laundry':     0,    // piece billing only
-  'Wash & Fold (Per KG)': 60,
-  'Wash & Iron (Per KG)': 90,
+  'Wash & Fold (Per KG)': 90,
+  'Wash & Iron (Per KG)': 130,
 }
 
 // Whether a service is KG-based by default
