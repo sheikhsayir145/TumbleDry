@@ -159,11 +159,16 @@ export default function POS() {
 
   return (
     <div style={{ padding:24, maxWidth:820, margin:'0 auto' }}>
-      <div style={{ marginBottom:20 }}>
-        <h1 style={{ fontSize:22, fontWeight:800, color:'var(--tx-primary)', letterSpacing:'-0.5px' }}>New Order</h1>
-        <p style={{ fontSize:13, color:'var(--tx-secondary)', marginTop:4 }}>
-          Tag: <span style={{ fontFamily:'DM Mono', fontWeight:700, color:'var(--indigo)' }}>{tagNumber}</span>
-        </p>
+      <div style={{ marginBottom:20, display:'flex', alignItems:'center', gap:16 }}>
+        <img src="/logo.png" alt="Tumbledry"
+          onError={e => { e.target.style.display='none' }}
+          style={{ height:56, width:'auto', objectFit:'contain' }} />
+        <div>
+          <div style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.6px', color:'var(--tx-secondary)' }}>New Order</div>
+          <div style={{ fontSize:13, color:'var(--tx-secondary)', marginTop:2 }}>
+            Tag: <span style={{ fontFamily:'DM Mono', fontWeight:800, color:'var(--indigo)' }}>{tagNumber}</span>
+          </div>
+        </div>
       </div>
 
       <div style={{ display:'grid', gap:20 }}>

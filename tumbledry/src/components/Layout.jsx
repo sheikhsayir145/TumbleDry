@@ -36,22 +36,8 @@ export default function Layout({ children }) {
         overflowY: 'auto',
       }}>
 
-        {/* Logo */}
-        <div style={{
-          width: 40, height: 40, borderRadius: 10, overflow: 'hidden',
-          marginBottom: 14, flexShrink: 0,
-          background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: '0 4px 12px rgba(99,102,241,0.35)',
-        }}>
-          <img src="/logo.png" alt="Logo"
-            onError={e => {
-              e.target.style.display = 'none'
-              e.target.parentElement.innerHTML = '<span style="font-size:20px">👕</span>'
-            }}
-            style={{ width:'100%', height:'100%', objectFit:'cover' }}
-          />
-        </div>
+        {/* Logo mark — small icon only in sidebar */}
+        <div style={{ fontSize: 26, marginBottom: 14, flexShrink: 0 }}>👕</div>
 
         {/* Nav */}
         {NAV.map(item => (

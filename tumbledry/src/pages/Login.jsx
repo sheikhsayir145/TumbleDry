@@ -85,28 +85,15 @@ export default function Login({ onLogin }) {
 
         {/* Logo + branding */}
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
-          <div style={{
-            width: 100,
-            height: 100,
-            borderRadius: 24,
-            overflow: 'hidden',
-            margin: '0 auto 20px',
-            boxShadow: '0 8px 32px rgba(99,102,241,0.3)',
-            background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            <img
-              src="/logo.png"
-              alt="Tumbledry"
-              onError={e => {
-                e.target.style.display = 'none'
-                e.target.parentElement.innerHTML = '<span style="font-size:48px">👕</span>'
-              }}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
-          </div>
+          <img
+            src="/logo.png"
+            alt="Tumbledry"
+            onError={e => {
+              e.target.style.display = 'none'
+              e.target.parentElement.insertAdjacentHTML('afterbegin', '<div style="font-size:64px;margin-bottom:16px">👕</div>')
+            }}
+            style={{ height: 90, width: 'auto', objectFit: 'contain', marginBottom: 16, display: 'block', margin: '0 auto 16px' }}
+          />
           <h1 style={{
             fontSize: 28,
             fontWeight: 800,
