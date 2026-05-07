@@ -1,7 +1,7 @@
 // src/pages/RateCard.jsx — Edit garment prices from UI
 
 import { useState } from 'react'
-import { GARMENT_CATEGORIES, GARMENT_RATES } from '../lib/garments.js'
+import { GARMENT_CATEGORIES, GARMENT_RATES, SERVICE_KG_RATES } from '../lib/garments.js'
 import { Card, Modal } from '../components/ui/index.jsx'
 
 // Load custom rates from localStorage, merge with defaults
@@ -13,7 +13,6 @@ function loadRates() {
 }
 
 function saveRates(rates) {
-  // Only save overrides — items that differ from defaults
   const overrides = {}
   Object.entries(rates).forEach(([name, price]) => {
     if (GARMENT_RATES[name] !== price) overrides[name] = price
@@ -21,8 +20,22 @@ function saveRates(rates) {
   localStorage.setItem('td-custom-rates', JSON.stringify(overrides))
 }
 
+function loadKgRates() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('td-kg-rates') || '{}')
+    return { ...SERVICE_KG_RATES, ...saved }
+  } catch { return { ...SERVICE_KG_RATES } }
+}
+
+function saveKgRates(rates) {
+  localStorage.setItem('td-kg-rates', JSON.stringify(rates))
+}
+
 export default function RateCard() {
   const [rates, setRates]         = useState(loadRates)
+  const [kgRates, setKgRates]     = useState(loadKgRates)
+  const [editKg, setEditKg]       = useState(null)
+  const [editKgPrice, setEditKgPrice] = useState('')
   const [search, setSearch]       = useState('')
   const [editItem, setEditItem]   = useState(null)   // { name, price }
   const [editPrice, setEditPrice] = useState('')
@@ -43,6 +56,23 @@ export default function RateCard() {
   })
 
   function showToast(msg) { setToast(msg); setTimeout(()=>setToast(''),2500) }
+
+  function saveEditKg() {
+    const price = parseFloat(editKgPrice)
+    if (!price || price <= 0) return showToast('Enter a valid price')
+    const updated = { ...kgRates, [editKg.name]: price }
+    setKgRates(updated)
+    saveKgRates(updated)
+    setEditKg(null)
+    showToast(`✅ ${editKg.name} updated to ₹${price}/KG`)
+  }
+
+  function resetKgItem(name) {
+    const updated = { ...kgRates, [name]: SERVICE_KG_RATES[name] }
+    setKgRates(updated)
+    saveKgRates(updated)
+    showToast(`↩️ ${name} reset to ₹${SERVICE_KG_RATES[name]}/KG`)
+  }
 
   function saveEdit() {
     const price = parseFloat(editPrice)
@@ -122,6 +152,40 @@ export default function RateCard() {
         </div>
       </div>
 
+      {/* KG Service Rates */}
+      <Card style={{marginBottom:20, padding:0, overflow:'hidden'}}>
+        <div style={{padding:'12px 20px', background:'var(--bg-raised)', borderBottom:'1px solid var(--bd-subtle)', display:'flex', alignItems:'center', justifyContent:'space-between'}}>
+          <div style={{fontSize:13, fontWeight:800, color:'var(--tx-primary)'}}>⚖️ KG Service Rates</div>
+          <div style={{fontSize:11, color:'var(--tx-secondary)'}}>Auto-applied when selecting KG services in POS</div>
+        </div>
+        <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(260px,1fr))'}}>
+          {Object.entries(kgRates).map(([name, price]) => {
+            const isModified = SERVICE_KG_RATES[name] !== price
+            return (
+              <div key={name} style={{display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 16px', borderBottom:'1px solid var(--bd-subtle)', borderRight:'1px solid var(--bd-subtle)'}}>
+                <div>
+                  <div style={{fontSize:13, fontWeight:600, color:'var(--tx-primary)'}}>{name}</div>
+                  {isModified && <div style={{fontSize:11, color:'var(--tx-tertiary)'}}>default ₹{SERVICE_KG_RATES[name]}/KG</div>}
+                </div>
+                <div style={{display:'flex', alignItems:'center', gap:8}}>
+                  <span style={{fontFamily:'DM Mono', fontWeight:700, fontSize:15, color:isModified?'var(--amber)':'var(--tx-primary)'}}>₹{price}<span style={{fontSize:11, fontWeight:400, color:'var(--tx-secondary)'}}>/KG</span></span>
+                  <button onClick={()=>{setEditKg({name,price}); setEditKgPrice(String(price))}}
+                    style={{padding:'4px 10px', borderRadius:6, border:'1px solid var(--bd-subtle)', background:'var(--bg-raised)', color:'var(--tx-secondary)', fontSize:11, fontWeight:600, cursor:'pointer', fontFamily:'inherit'}}>
+                    Edit
+                  </button>
+                  {isModified && (
+                    <button onClick={()=>resetKgItem(name)}
+                      style={{padding:'4px 8px', borderRadius:6, border:'1px solid rgba(244,63,94,0.2)', background:'rgba(244,63,94,0.08)', color:'var(--rose)', fontSize:11, cursor:'pointer'}}>
+                      ↩
+                    </button>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </Card>
+
       {/* Search */}
       <div style={{marginBottom:20}}>
         <input value={search} onChange={e=>setSearch(e.target.value)}
@@ -181,6 +245,29 @@ export default function RateCard() {
           )
         })}
       </div>
+
+      {/* Edit KG rate modal */}
+      <Modal open={!!editKg} onClose={()=>setEditKg(null)} title={`Edit KG Rate — ${editKg?.name}`} maxWidth={380}>
+        {editKg && (
+          <div style={{display:'grid', gap:14}}>
+            <div style={{padding:'12px 14px', background:'var(--bg-raised)', borderRadius:8, fontSize:13, color:'var(--tx-secondary)'}}>
+              Current: <span style={{fontFamily:'DM Mono', fontWeight:700, color:'var(--tx-primary)'}}>₹{editKg.price}/KG</span>
+              {SERVICE_KG_RATES[editKg.name] !== editKg.price && (
+                <span style={{marginLeft:8, color:'var(--tx-tertiary)'}}>· Default: ₹{SERVICE_KG_RATES[editKg.name]}/KG</span>
+              )}
+            </div>
+            <div>
+              <label style={lbl}>New Price per KG (₹)</label>
+              <input style={inp} type="number" min="1" value={editKgPrice} onChange={e=>setEditKgPrice(e.target.value)}
+                onKeyDown={e=>e.key==='Enter'&&saveEditKg()} autoFocus />
+            </div>
+            <div style={{display:'flex', gap:10}}>
+              <button onClick={()=>setEditKg(null)} style={{flex:1, padding:11, background:'var(--bg-raised)', border:'1px solid var(--bd-subtle)', borderRadius:8, fontFamily:'inherit', fontWeight:600, cursor:'pointer', color:'var(--tx-secondary)'}}>Cancel</button>
+              <button onClick={saveEditKg} style={{flex:2, padding:11, background:'linear-gradient(135deg,#6366f1,#4f46e5)', color:'white', border:'none', borderRadius:8, fontFamily:'inherit', fontWeight:700, cursor:'pointer'}}>Save Rate</button>
+            </div>
+          </div>
+        )}
+      </Modal>
 
       {/* Edit price modal */}
       <Modal open={!!editItem} onClose={()=>setEditItem(null)} title={`Edit Price — ${editItem?.name}`} maxWidth={380}>

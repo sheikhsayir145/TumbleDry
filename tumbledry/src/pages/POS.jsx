@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useStore } from '../store/index.js'
-import { GARMENT_CATEGORIES, GARMENT_RATES, SERVICES, getNextTag, calcDeliveryDate } from '../lib/garments.js'
+import { GARMENT_CATEGORIES, GARMENT_RATES, SERVICES, SERVICE_KG_RATES, isKgService, getNextTag, calcDeliveryDate } from '../lib/garments.js'
 
 // Use custom rates if set in rate card editor, else fall back to defaults
 function getActiveRates() {
@@ -10,6 +10,13 @@ function getActiveRates() {
     const saved = JSON.parse(localStorage.getItem('td-custom-rates') || '{}')
     return { ...GARMENT_RATES, ...saved }
   } catch { return GARMENT_RATES }
+}
+
+function getActiveKgRates() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('td-kg-rates') || '{}')
+    return { ...SERVICE_KG_RATES, ...saved }
+  } catch { return SERVICE_KG_RATES }
 }
 
 export default function POS() {
@@ -200,7 +207,18 @@ export default function POS() {
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12 }}>
             <div style={s.wrap}><label style={s.label}>Tag Number</label><input style={s.input} value={tagNumber} onChange={e => setTagNumber(e.target.value)} /></div>
             <div style={s.wrap}><label style={s.label}>Delivery Date</label><input style={s.input} value={deliveryDate} onChange={e => setDeliveryDate(e.target.value)} /></div>
-            <div style={s.wrap}><label style={s.label}>Service</label><select style={s.input} value={serviceType} onChange={e => setServiceType(e.target.value)}>{SERVICES.map(sv => <option key={sv}>{sv}</option>)}</select></div>
+            <div style={s.wrap}><label style={s.label}>Service</label><select style={s.input} value={serviceType} onChange={e => {
+                const svc = e.target.value
+                setServiceType(svc)
+                // Auto-switch billing mode for KG services
+                if (isKgService(svc)) {
+                  setBillingMode('kg')
+                  const kgRates = getActiveKgRates()
+                  setKgPrice(kgRates[svc] || SERVICE_KG_RATES[svc] || 90)
+                } else {
+                  setBillingMode('piece')
+                }
+              }}>{SERVICES.map(sv => <option key={sv}>{sv}</option>)}</select></div>
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
             <div style={s.wrap}><label style={s.label}>Payment Method</label><select style={s.input} value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)}><option>Cash</option><option>Online</option></select></div>

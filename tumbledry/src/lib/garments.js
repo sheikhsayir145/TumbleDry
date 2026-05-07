@@ -134,6 +134,20 @@ export const SERVICES = [
   'Wash & Iron (Per KG)',
 ]
 
+// Default KG rates per service — shown automatically when switching service type
+export const SERVICE_KG_RATES = {
+  'Dry Clean':           0,    // piece billing only
+  'Steam Iron':          0,    // piece billing only
+  'Premium Laundry':     0,    // piece billing only
+  'Wash & Fold (Per KG)': 60,
+  'Wash & Iron (Per KG)': 90,
+}
+
+// Whether a service is KG-based by default
+export function isKgService(serviceType) {
+  return serviceType === 'Wash & Fold (Per KG)' || serviceType === 'Wash & Iron (Per KG)'
+}
+
 export const EMPLOYEES = ['Jamil', 'Ajaz', 'Moomin', 'Shahid', 'Shabir']
 export const ATT_STATUSES = ['Working', 'Absent', 'Leave', 'Half Day', 'Holiday']
 

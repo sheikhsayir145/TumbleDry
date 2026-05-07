@@ -188,6 +188,39 @@ export default function Analytics() {
       {/* Insights Tab */}
       {tab === 'insights' && (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+
+          {/* Discount Impact */}
+          {(() => {
+            const discountOrders  = active.filter(o => (o.discountAmount||0) > 0)
+            const totalDiscount   = discountOrders.reduce((s,o) => s+(o.discountAmount||0), 0)
+            const totalGross      = active.reduce((s,o) => s+(o.grandTotal+(o.discountAmount||0)), 0)
+            const discountRate    = totalGross > 0 ? (totalDiscount/totalGross*100).toFixed(1) : 0
+            const avgDiscount     = discountOrders.length > 0 ? Math.round(totalDiscount/discountOrders.length) : 0
+            return (
+              <Card style={{ gridColumn: '1 / -1' }}>
+                <h4 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 16, color: 'var(--tx-primary)' }}>🏷️ Discount Impact Report</h4>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, marginBottom: 16 }}>
+                  {[
+                    { label: 'Orders with Discount', value: discountOrders.length, color: 'var(--amber)' },
+                    { label: 'Total Discount Given', value: `₹${Math.round(totalDiscount).toLocaleString()}`, color: 'var(--rose)' },
+                    { label: 'Avg Discount per Order', value: `₹${avgDiscount.toLocaleString()}`, color: 'var(--indigo)' },
+                    { label: 'Effective Discount Rate', value: `${discountRate}%`, color: 'var(--emerald)' },
+                  ].map(k => (
+                    <div key={k.label} style={{ background: 'var(--bg-raised)', borderRadius: 8, padding: '12px 14px', borderLeft: `3px solid ${k.color}` }}>
+                      <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--tx-secondary)', marginBottom: 6 }}>{k.label}</div>
+                      <div style={{ fontSize: 20, fontWeight: 800, fontFamily: 'DM Mono', color: 'var(--tx-primary)' }}>{k.value}</div>
+                    </div>
+                  ))}
+                </div>
+                {discountOrders.length > 0 && (
+                  <div style={{ fontSize: 13, color: 'var(--tx-secondary)', padding: '10px 14px', background: 'rgba(245,158,11,0.06)', borderRadius: 8, border: '1px solid rgba(245,158,11,0.15)' }}>
+                    💡 You gave discounts on <strong style={{ color: 'var(--tx-primary)' }}>{((discountOrders.length/active.length)*100).toFixed(1)}%</strong> of orders, totalling <strong style={{ color: 'var(--rose)', fontFamily: 'DM Mono' }}>₹{Math.round(totalDiscount).toLocaleString()}</strong> in revenue reduction.
+                    Gross revenue before discounts: <strong style={{ color: 'var(--tx-primary)', fontFamily: 'DM Mono' }}>₹{Math.round(totalGross).toLocaleString()}</strong>
+                  </div>
+                )}
+              </Card>
+            )
+          })()}
           {/* Top customers */}
           <Card>
             <h4 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 16, color: 'var(--tx-primary)' }}>🏆 Top 10 Customers by Spend</h4>
