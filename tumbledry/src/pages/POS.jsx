@@ -13,7 +13,7 @@ function getActiveRates() {
 }
 
 export default function POS() {
-  const { orders, upsertOrder, cart, addToCart, removeFromCart, clearCart, orderDiscount, setOrderDiscount } = useStore()
+  const { orders, ordersLoading, upsertOrder, cart, addToCart, removeFromCart, clearCart, orderDiscount, setOrderDiscount } = useStore()
 
   const [customer, setCustomer]         = useState({ name:'', number:'', address:'', city:'', pincode:'' })
   const [serviceType, setServiceType]   = useState('Dry Clean')
@@ -40,10 +40,17 @@ export default function POS() {
   const [toast, setToast]         = useState('')
   const dropdownRef = useRef(null)
 
+  // Update tag number whenever orders load or change
+  // This runs on mount AND after fetchOrders completes in App.jsx
   useEffect(() => {
-    setTagNumber(getNextTag(orders))
-    setDeliveryDate(calcDeliveryDate())
+    const nextTag = getNextTag(orders)
+    setTagNumber(nextTag)
   }, [orders.length])
+
+  // Set delivery date once on mount
+  useEffect(() => {
+    setDeliveryDate(calcDeliveryDate())
+  }, [])
 
   useEffect(() => {
     const h = e => { if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setShowDropdown(false) }

@@ -5,14 +5,12 @@ import { useStore } from '../store/index.js'
 import { Card, Badge, Spinner, EmptyState, Modal } from '../components/ui/index.jsx'
 
 export default function PendingPayments() {
-  const { orders, ordersLoading, fetchOrders, upsertOrder } = useStore()
+  const { orders, ordersLoading, upsertOrder } = useStore()
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [sortBy, setSortBy] = useState('oldest')
   const [toast, setToast] = useState('')
   const [confirmOrder, setConfirmOrder] = useState(null)
-
-  useEffect(() => { fetchOrders() }, [])
 
   const pending = orders.filter(o =>
     !o.deleted && (o.paymentStatus === 'Pending' || o.paymentStatus === 'Partial')

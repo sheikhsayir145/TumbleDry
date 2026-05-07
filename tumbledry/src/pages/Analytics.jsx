@@ -26,10 +26,8 @@ function chartOpts(title) {
 }
 
 export default function Analytics() {
-  const { orders, ordersLoading, fetchOrders } = useStore()
+  const { orders, ordersLoading } = useStore()
   const [tab, setTab] = useState('performance')
-
-  useEffect(() => { fetchOrders() }, [])
 
   const active = orders.filter(o => !o.deleted)
   const now    = new Date()

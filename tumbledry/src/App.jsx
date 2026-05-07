@@ -14,11 +14,19 @@ import Reports from './pages/Reports.jsx'
 import RateCard from './pages/RateCard.jsx'
 
 export default function App() {
-  const { darkMode } = useStore()
+  const { darkMode, fetchOrders } = useStore()
+
   useEffect(() => {
+    // Apply dark mode
     if (darkMode) document.documentElement.classList.add('dark')
     else document.documentElement.classList.remove('dark')
   }, [darkMode])
+
+  useEffect(() => {
+    // Fetch orders ONCE on app load — all pages share this data
+    // This fixes the tag number issue and avoids repeated API calls
+    fetchOrders()
+  }, [])
 
   return (
     <Layout>

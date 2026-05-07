@@ -15,7 +15,7 @@ const TIMELINE = [
 ]
 
 export default function Dashboard() {
-  const { orders, ordersLoading, fetchOrders, upsertOrder } = useStore()
+  const { orders, ordersLoading, upsertOrder } = useStore()
   const [search, setSearch]         = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [expanded, setExpanded]     = useState(null)
@@ -23,8 +23,6 @@ export default function Dashboard() {
   const [paymentModal, setPaymentModal] = useState(null)
   const [editOrder, setEditOrder]   = useState(null)
   const [toast, setToast]           = useState('')
-
-  useEffect(() => { fetchOrders() }, [])
 
   const active = orders.filter(o => !o.deleted)
   const now    = new Date()

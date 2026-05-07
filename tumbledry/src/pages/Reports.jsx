@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react'
 import { useStore } from '../store/index.js'
+import { api } from '../lib/api.js'
 import { Card, Modal, Spinner } from '../components/ui/index.jsx'
 
 export default function Reports() {
@@ -14,11 +15,85 @@ export default function Reports() {
   const [toDate, setToDate] = useState(new Date().toISOString().split('T')[0])
   const [reportDate, setReportDate] = useState(new Date().toISOString().split('T')[0])
   const [showReport, setShowReport] = useState(false)
-  const [toast, setToast] = useState('')
-
-  useEffect(() => { fetchOrders() }, [])
+  const [toast, setToast]       = useState('')
+  const [importing, setImporting] = useState(false)
+  const [importResult, setImportResult] = useState(null)
 
   const active = orders.filter(o => !o.deleted)
+
+  // ── CSV Import ──────────────────────────────────────────────
+  async function handleImportCSV(e) {
+    const file = e.target.files[0]
+    if (!file) return
+    setImporting(true)
+    setImportResult(null)
+
+    try {
+      const text = await file.text()
+      const lines = text.split('
+').filter(l => l.trim())
+      const headers = lines[0].split(',').map(h => h.replace(/"/g,'').trim())
+
+      const orders = []
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i]
+        if (!line.trim()) continue
+
+        // Parse CSV respecting quoted fields
+        const vals = []
+        let cur = '', inQuote = false
+        for (let c = 0; c < line.length; c++) {
+          if (line[c] === '"') { inQuote = !inQuote }
+          else if (line[c] === ',' && !inQuote) { vals.push(cur.trim()); cur = '' }
+          else cur += line[c]
+        }
+        vals.push(cur.trim())
+
+        const row = {}
+        headers.forEach((h, idx) => { row[h] = vals[idx] || '' })
+
+        // Map CSV columns to our order format
+        orders.push({
+          id:              row['Order ID'] || `IMP${i}`,
+          customerName:    row['Customer Name'] || '',
+          customerNumber:  row['Phone'] || '',
+          customerAddress: row['Address'] || '',
+          customerCity:    row['City'] || '',
+          customerPincode: '',
+          tagNumber:       row['Tag #'] || '',
+          serviceType:     row['Service'] || 'Dry Clean',
+          status:          row['Status'] || 'delivered',
+          paymentMethod:   row['Payment Method'] || 'Cash',
+          paymentStatus:   row['Payment Status'] || 'Paid',
+          grandTotal:      parseFloat(row['Grand Total (₹)']) || 0,
+          totalGarments:   parseInt(row['Total Garments']) || 1,
+          discountAmount:  parseFloat(row['Discount (₹)']) || 0,
+          discountPct:     parseFloat(row['Discount %']) || 0,
+          orderDate:       row['Order Date'] ? new Date(row['Order Date']).toISOString() : new Date().toISOString(),
+          deliveryDate:    row['Delivery Date'] || '',
+          cart:            [],
+          deleted:         false,
+        })
+      }
+
+      if (orders.length === 0) throw new Error('No valid orders found in CSV')
+
+      // Send to Neon in one batch
+      await api.orders.replaceAll(orders)
+
+      // Refresh store
+      await fetchOrders()
+
+      setImportResult({ success: true, count: orders.length })
+      showToast(`✅ Imported ${orders.length} orders successfully`)
+    } catch(err) {
+      setImportResult({ success: false, error: err.message })
+      showToast('❌ Import failed: ' + err.message)
+    } finally {
+      setImporting(false)
+      e.target.value = '' // reset file input
+    }
+  }
 
   // ── CSV Export ───────────────────────────────────────────────
   function exportCSV() {
@@ -167,7 +242,7 @@ export default function Reports() {
     <div style={{padding:24, maxWidth:900, margin:'0 auto'}}>
       <h1 style={{fontSize:22, fontWeight:800, marginBottom:24, color:'var(--tx-primary)', letterSpacing:'-0.5px'}}>📄 Reports</h1>
 
-      <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:20}}>
+      <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(380px, 1fr))', gap:20}}>
 
         {/* CSV Export */}
         <div style={card}>
@@ -200,6 +275,34 @@ export default function Reports() {
           <div style={{marginTop:14, fontSize:12, color:'var(--tx-tertiary)', lineHeight:1.6}}>
             Exports: Order ID, Customer, Phone, Tag, Service, Status, Payment, Discount, Items and more.
             Opens directly in Excel or Google Sheets.
+          </div>
+        </div>
+
+        {/* CSV Import */}
+        <div style={card}>
+          <div style={{fontSize:12, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.6px', color:'var(--tx-secondary)', marginBottom:20}}>📤 Import from CSV</div>
+
+          <div style={{padding:'14px', background:'var(--bg-raised)', borderRadius:8, marginBottom:16, fontSize:13, color:'var(--tx-secondary)', border:'1px solid var(--bd-subtle)', lineHeight:1.7}}>
+            <strong style={{color:'var(--tx-primary)'}}>⚠️ Warning:</strong> This will <strong style={{color:'var(--rose)'}}>replace ALL existing orders</strong> in the database with the CSV data. Use only for initial data migration.
+          </div>
+
+          <label style={{display:'block', cursor:'pointer'}}>
+            <input type="file" accept=".csv" onChange={handleImportCSV} style={{display:'none'}} disabled={importing} />
+            <div style={{width:'100%', padding:12, background: importing ? 'var(--bg-raised)' : 'linear-gradient(135deg,#6366f1,#4f46e5)', color: importing ? 'var(--tx-secondary)' : 'white', border: importing ? '1px solid var(--bd-subtle)' : 'none', borderRadius:10, fontFamily:'inherit', fontWeight:700, fontSize:14, cursor: importing ? 'not-allowed' : 'pointer', boxShadow: importing ? 'none' : '0 4px 20px rgba(99,102,241,0.25)', textAlign:'center'}}>
+              {importing ? '⏳ Importing...' : '📤 Choose CSV File to Import'}
+            </div>
+          </label>
+
+          {importResult && (
+            <div style={{marginTop:14, padding:'12px 14px', borderRadius:8, background: importResult.success ? 'rgba(16,185,129,0.08)' : 'rgba(244,63,94,0.08)', border: `1px solid ${importResult.success ? 'rgba(16,185,129,0.2)' : 'rgba(244,63,94,0.2)'}`, fontSize:13, color: importResult.success ? 'var(--emerald)' : 'var(--rose)'}}>
+              {importResult.success
+                ? `✅ ${importResult.count} orders imported successfully`
+                : `❌ Error: ${importResult.error}`}
+            </div>
+          )}
+
+          <div style={{marginTop:14, fontSize:12, color:'var(--tx-tertiary)', lineHeight:1.6}}>
+            Upload the <strong>tumbledry_orders_import.csv</strong> file generated from your old CRM data. The CSV must have the same column headers as the export format.
           </div>
         </div>
 

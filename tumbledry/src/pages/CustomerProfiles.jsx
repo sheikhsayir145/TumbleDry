@@ -5,11 +5,9 @@ import { useStore } from '../store/index.js'
 import { Card, Badge, Spinner, EmptyState } from '../components/ui/index.jsx'
 
 export default function CustomerProfiles() {
-  const { orders, ordersLoading, fetchOrders } = useStore()
+  const { orders, ordersLoading } = useStore()
   const [search, setSearch] = useState('')
   const [selectedPhone, setSelectedPhone] = useState(null)
-
-  useEffect(() => { fetchOrders() }, [])
 
   const active = orders.filter(o => !o.deleted)
 
