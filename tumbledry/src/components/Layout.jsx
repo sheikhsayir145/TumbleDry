@@ -38,6 +38,7 @@ export default function Layout({ children }) {
 
   return (
     <div className="app-layout">
+      <div className="solo-bubble" aria-hidden="true" />
 
       {/* ── Desktop Sidebar ── */}
       <aside className="app-sidebar">
