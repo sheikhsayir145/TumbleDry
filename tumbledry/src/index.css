@@ -127,6 +127,16 @@ body {
 @keyframes spin    { to { transform: rotate(360deg); } }
 @keyframes pulse   { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 @keyframes loadingBar { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+/* Soap-bubble float: dots drift upward with a gentle horizontal sway */
+@keyframes bubblesFloat {
+  0%   { background-position: 0px   0px,    16px  10px; }
+  20%  { background-position: 5px  -64px,   20px  -22px; }
+  40%  { background-position: 0px  -128px,  16px  -54px; }
+  60%  { background-position: -5px -192px,  12px  -86px; }
+  80%  { background-position: 0px  -256px,  16px -118px; }
+  100% { background-position: 0px  -320px,  16px -150px; }
+}
 @keyframes popIn   { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
 .animate-fade-up  { animation: fadeUp 0.35s var(--ease-out) both; }
@@ -171,20 +181,22 @@ html.dark .app-sidebar {
   overflow: auto;
   background-color: var(--bg-base);
   background-image:
-    radial-gradient(circle, rgba(114,191,44,0.09) 1.5px, transparent 1.5px),
-    radial-gradient(circle, rgba(252,194,0,0.06)  1px,   transparent 1px);
-  background-size: 28px 28px, 16px 16px;
-  background-position: 0 0, 14px 8px;
+    radial-gradient(circle, rgba(95,173,26,0.28)  3px,   transparent 3px),
+    radial-gradient(circle, rgba(252,194,0,0.20)  2px,   transparent 2px);
+  background-size: 32px 32px, 20px 20px;
+  background-position: 0 0, 16px 10px;
+  animation: bubblesFloat 22s linear infinite;
   position: relative;
 }
 
 html.dark .app-main {
   background-color: var(--bg-base);
   background-image:
-    radial-gradient(circle, rgba(95,173,26,0.10) 1.5px, transparent 1.5px),
-    radial-gradient(circle, rgba(252,194,0,0.06) 1px,   transparent 1px);
-  background-size: 28px 28px, 16px 16px;
-  background-position: 0 0, 14px 8px;
+    radial-gradient(circle, rgba(114,191,44,0.22) 3px,   transparent 3px),
+    radial-gradient(circle, rgba(252,194,0,0.14)  2px,   transparent 2px);
+  background-size: 32px 32px, 20px 20px;
+  background-position: 0 0, 16px 10px;
+  animation: bubblesFloat 22s linear infinite;
 }
 
 /* ── Sidebar nav items ── */
