@@ -67,6 +67,7 @@ export default function POS() {
   const [cashAmount,    setCashAmount]    = useState('')
   const [onlineAmount,  setOnlineAmount]  = useState('')
   const [toast,         setToast]         = useState('')
+  const [cartRevision,  setCartRevision]  = useState(0)
   const dropdownRef = useRef(null)
 
   useEffect(() => { setTagNumber(getNextTag(orders)) }, [orders.length])
@@ -119,6 +120,7 @@ export default function POS() {
     const price = parseFloat(itemPrice), qty = parseInt(itemQty) || 1
     const gross = price * qty, discAmt = Math.round(gross * (parseInt(itemDiscount) || 0) / 100)
     addToCart({ type:'piece', name:selectedGarment, printedTagName:selectedGarment, serviceName:serviceType, unitPrice:price, qty, discountPct:parseInt(itemDiscount)||0, discountAmount:discAmt, net:gross-discAmt })
+    setCartRevision(r => r + 1)
     setGarmentSearch(''); setSelectedGarment(null); setItemPrice(''); setItemQty(1); setItemDiscount(0)
   }
 
@@ -127,6 +129,7 @@ export default function POS() {
     if (!weight) return showToast('Enter weight')
     const net = weight * parseFloat(kgPrice)
     addToCart({ type:'kg', name:`${serviceType} (${weight} KG)`, printedTagName:'Assorted Garment', serviceName:serviceType, weight, unitPrice:parseFloat(kgPrice), qty:parseInt(kgQty)||1, discountPct:0, discountAmount:0, net:Math.round(net) })
+    setCartRevision(r => r + 1)
     setKgWeight(''); setKgQty(1)
   }
 
@@ -136,6 +139,7 @@ export default function POS() {
     const price = parseFloat(customPrice), qty = parseInt(customQty) || 1
     const gross = price * qty, discAmt = Math.round(gross * (parseInt(customDisc) || 0) / 100)
     addToCart({ type:'piece', name:customName.trim(), printedTagName:customName.trim(), serviceName:serviceType, unitPrice:price, qty, discountPct:parseInt(customDisc)||0, discountAmount:discAmt, net:gross-discAmt })
+    setCartRevision(r => r + 1)
     setCustomName(''); setCustomPrice(''); setCustomQty(1); setCustomDisc(0); setShowCustom(false)
   }
 
@@ -503,7 +507,7 @@ export default function POS() {
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--tx-secondary)' }}>Grand Total</span>
-                <span className="mono" style={{ fontSize: 32, fontWeight: 800, color: 'var(--indigo)', letterSpacing: '-1px' }}>₹{grandTotal.toLocaleString()}</span>
+                <span key={cartRevision} className="mono cart-bump" style={{ fontSize: 32, fontWeight: 800, color: 'var(--indigo)', letterSpacing: '-1px' }}>₹{grandTotal.toLocaleString()}</span>
               </div>
             </div>
 

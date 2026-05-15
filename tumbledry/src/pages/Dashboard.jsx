@@ -10,15 +10,15 @@ import {
   Phone, MapPin, Shirt, CreditCard, Tag, Package,
   Pencil, Printer, ChevronUp, ChevronDown,
   Check, Clock, AlertCircle, ClipboardList,
-  Banknote, Smartphone,
+  Banknote, Smartphone, List, LayoutGrid,
 } from 'lucide-react'
 
 const STATUS_ORDER = ['pending', 'inprocess', 'completed', 'delivered']
 const TIMELINE = [
-  { key: 'pending',   label: 'Received',   icon: Inbox          },
-  { key: 'inprocess', label: 'In Process', icon: Settings2       },
-  { key: 'completed', label: 'Ready',      icon: CheckCircle2    },
-  { key: 'delivered', label: 'Delivered',  icon: Truck           },
+  { key: 'pending',   label: 'Received',   icon: Inbox       },
+  { key: 'inprocess', label: 'In Process', icon: Settings2    },
+  { key: 'completed', label: 'Ready',      icon: CheckCircle2 },
+  { key: 'delivered', label: 'Delivered',  icon: Truck        },
 ]
 
 const STATUS_COLORS = {
@@ -26,6 +26,14 @@ const STATUS_COLORS = {
   inprocess: { bg: 'rgba(14,165,233,0.12)',  color: '#0369A1' },
   completed: { bg: 'rgba(16,185,129,0.12)',  color: '#059669' },
   delivered: { bg: 'rgba(114,191,44,0.12)',  color: '#5FAD1A' },
+}
+
+function dateUrgency(deliveryDate, status) {
+  if (status === 'delivered' || !deliveryDate) return {}
+  const today = new Date().toISOString().split('T')[0]
+  if (deliveryDate < today) return { color: 'var(--rose)', fontWeight: 700 }
+  if (deliveryDate === today) return { color: 'var(--amber)', fontWeight: 700 }
+  return {}
 }
 
 export default function Dashboard() {
@@ -37,6 +45,7 @@ export default function Dashboard() {
   const [paymentModal, setPaymentModal] = useState(null)
   const [editOrder,    setEditOrder]    = useState(null)
   const [toast,        setToast]        = useState('')
+  const [viewMode,     setViewMode]     = useState('list')
 
   const active   = orders.filter(o => !o.deleted)
   const now      = new Date()
@@ -46,7 +55,9 @@ export default function Dashboard() {
   const mtdRevenue   = active
     .filter(o => { const d = new Date(o.orderDate); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear() })
     .reduce((s, o) => s + o.grandTotal, 0)
-  const todayRevenue = active.filter(o => o.orderDate.slice(0, 10) === todayStr).reduce((s, o) => s + o.grandTotal, 0)
+  const todayOrders  = active.filter(o => o.orderDate.slice(0, 10) === todayStr)
+  const todayRevenue = todayOrders.reduce((s, o) => s + o.grandTotal, 0)
+  const activeCount  = active.filter(o => o.status !== 'delivered').length
 
   const revenueValue = revenueView === 'today' ? todayRevenue : revenueView === 'mtd' ? mtdRevenue : totalRevenue
   const revenueLabel = revenueView === 'today' ? 'Today' : revenueView === 'mtd' ? 'Month to Date' : 'All Time'
@@ -64,9 +75,7 @@ export default function Dashboard() {
   async function updateStatus(order, newStatus) {
     await upsertOrder({ ...order, status: newStatus })
     showToast(`Status → ${newStatus}`)
-    if (newStatus === 'completed') {
-      setTimeout(() => sendReadyWhatsApp(order), 400)
-    }
+    if (newStatus === 'completed') setTimeout(() => sendReadyWhatsApp(order), 400)
   }
 
   function sendReadyWhatsApp(order) {
@@ -116,12 +125,36 @@ export default function Dashboard() {
 
   return (
     <div className="page">
-      <h1 style={{ fontSize: 20, fontWeight: 800, marginBottom: 20, color: 'var(--tx-primary)', letterSpacing: '-0.4px' }}>Dashboard</h1>
+      <h1 style={{ fontSize: 20, fontWeight: 800, marginBottom: 14, color: 'var(--tx-primary)', letterSpacing: '-0.4px' }}>Dashboard</h1>
+
+      {/* ── Sticky Today Summary ── */}
+      <div style={{
+        position: 'sticky', top: 0, zIndex: 40,
+        background: 'var(--bg-card)', border: '1px solid var(--bd-subtle)',
+        borderRadius: 12, padding: '10px 16px', marginBottom: 16,
+        display: 'flex', gap: 20, alignItems: 'center', flexWrap: 'wrap',
+        boxShadow: 'var(--shadow-sm)',
+      }}>
+        <span style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.7px', color: 'var(--tx-tertiary)' }}>Today</span>
+        <div style={{ display: 'flex', gap: 5, alignItems: 'baseline' }}>
+          <span className="mono" style={{ fontSize: 18, fontWeight: 800, color: 'var(--brand-green)', letterSpacing: '-0.5px' }}>₹{todayRevenue.toLocaleString()}</span>
+          <span style={{ fontSize: 11, color: 'var(--tx-tertiary)', fontWeight: 600 }}>revenue</span>
+        </div>
+        <div style={{ display: 'flex', gap: 5, alignItems: 'baseline' }}>
+          <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--tx-primary)' }}>{todayOrders.length}</span>
+          <span style={{ fontSize: 11, color: 'var(--tx-tertiary)', fontWeight: 600 }}>orders today</span>
+        </div>
+        <div style={{ height: 16, width: 1, background: 'var(--bd-subtle)' }} />
+        <div style={{ display: 'flex', gap: 5, alignItems: 'baseline' }}>
+          <span style={{ fontSize: 14, fontWeight: 800, color: activeCount > 0 ? 'var(--amber)' : 'var(--emerald)' }}>{activeCount}</span>
+          <span style={{ fontSize: 11, color: 'var(--tx-tertiary)', fontWeight: 600 }}>active orders</span>
+        </div>
+      </div>
 
       {/* Stat cards */}
       <div className="stat-grid">
         {STAT_CARDS.map(c => (
-          <div key={c.label} style={{
+          <div key={c.label} className="lift-hover" style={{
             background: c.gradient, borderRadius: 14, padding: '16px 18px',
             boxShadow: c.shadow, color: 'white', position: 'relative', overflow: 'hidden',
           }}>
@@ -135,9 +168,10 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Orders list */}
+      {/* Orders card */}
       <Card style={{ padding: 0, overflow: 'hidden' }}>
-        {/* Filters */}
+
+        {/* Filter bar + view toggle */}
         <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--bd-subtle)', display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
           <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--tx-primary)', marginRight: 'auto' }}>Recent Orders</span>
           <input
@@ -155,17 +189,100 @@ export default function Dashboard() {
             <option value="completed">Ready</option>
             <option value="delivered">Delivered</option>
           </select>
+
+          {/* List / Board toggle */}
+          <div style={{ display: 'flex', background: 'var(--bg-raised)', borderRadius: 8, padding: 3, border: '1px solid var(--bd-subtle)', gap: 2 }}>
+            {[{ mode: 'list', Icon: List, label: 'List' }, { mode: 'board', Icon: LayoutGrid, label: 'Board' }].map(({ mode, Icon, label }) => (
+              <button key={mode} onClick={() => setViewMode(mode)} style={{
+                padding: '5px 10px', borderRadius: 6, border: 'none', cursor: 'pointer',
+                fontFamily: 'inherit', fontWeight: 600, fontSize: 11,
+                background: viewMode === mode ? 'var(--bg-card)' : 'transparent',
+                color: viewMode === mode ? 'var(--indigo)' : 'var(--tx-tertiary)',
+                boxShadow: viewMode === mode ? 'var(--shadow-sm)' : 'none',
+                transition: 'all 0.15s', display: 'flex', alignItems: 'center', gap: 4,
+              }}>
+                <Icon size={13} strokeWidth={2} />{label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {filtered.length === 0 ? (
           <EmptyState icon={<ClipboardList size={38} strokeWidth={1.5} />} title="No orders found" subtitle="Try adjusting your search or filters" />
+
+        ) : viewMode === 'board' ? (
+
+          /* ── Kanban board ── */
+          <div style={{ padding: 16 }}>
+            <div className="kanban-board">
+              {TIMELINE.map(col => {
+                const colOrders = filtered.filter(o => o.status === col.key)
+                const Icon      = col.icon
+                const sc        = STATUS_COLORS[col.key]
+                return (
+                  <div key={col.key}>
+                    {/* Column header */}
+                    <div style={{
+                      display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10,
+                      padding: '8px 10px', borderRadius: 9,
+                      background: sc.bg, border: `1px solid ${sc.color}22`,
+                    }}>
+                      <Icon size={13} color={sc.color} strokeWidth={2.5} />
+                      <span style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', color: sc.color, flex: 1 }}>{col.label}</span>
+                      <span style={{ fontSize: 11, fontWeight: 700, background: `${sc.color}22`, color: sc.color, borderRadius: 99, padding: '1px 7px' }}>{colOrders.length}</span>
+                    </div>
+
+                    {colOrders.length === 0 ? (
+                      <div style={{ textAlign: 'center', padding: '20px 0', color: 'var(--tx-tertiary)', fontSize: 12 }}>Empty</div>
+                    ) : (
+                      colOrders.slice(0, 50).map(order => {
+                        const urgStyle = dateUrgency(order.deliveryDate, order.status)
+                        return (
+                          <div
+                            key={order.id}
+                            className="kanban-card"
+                            onClick={() => setEditOrder(order)}
+                            style={{
+                              background: 'var(--bg-card)', border: '1px solid var(--bd-subtle)',
+                              borderRadius: 10, padding: '10px 12px', marginBottom: 8, cursor: 'pointer',
+                            }}
+                          >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4, gap: 6 }}>
+                              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--tx-primary)', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{order.customerName}</div>
+                              <div className="mono" style={{ fontSize: 10, fontWeight: 700, color: 'var(--indigo)', flexShrink: 0 }}>{order.tagNumber}</div>
+                            </div>
+                            <div style={{ fontSize: 11, color: 'var(--tx-secondary)', marginBottom: 8 }}>{order.customerNumber}</div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <div className="mono" style={{ fontSize: 14, fontWeight: 800, color: 'var(--tx-primary)' }}>₹{order.grandTotal?.toLocaleString()}</div>
+                              {order.deliveryDate && (
+                                <div style={{ fontSize: 10, fontWeight: 600, ...urgStyle }}>{order.deliveryDate}</div>
+                              )}
+                            </div>
+                            {order.paymentStatus !== 'Paid' && (
+                              <div style={{ fontSize: 9, padding: '2px 7px', borderRadius: 99, background: 'rgba(244,63,94,0.1)', color: 'var(--rose)', fontWeight: 700, marginTop: 6, display: 'inline-block', textTransform: 'uppercase', letterSpacing: '0.3px' }}>{order.paymentStatus}</div>
+                            )}
+                          </div>
+                        )
+                      })
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
         ) : (
+
+          /* ── List view ── */
           <div>
             {filtered.slice(0, 100).map(order => {
-              const curIdx    = STATUS_ORDER.indexOf(order.status)
+              const curIdx     = STATUS_ORDER.indexOf(order.status)
               const isExpanded = expanded === order.id
+              const urgStyle   = dateUrgency(order.deliveryDate, order.status)
+              const isOverdue  = urgStyle.color === 'var(--rose)'
+              const isDueToday = urgStyle.color === 'var(--amber)'
               return (
-                <div key={order.id} style={{ borderBottom: '1px solid var(--bd-subtle)', borderLeft: `3px solid ${isExpanded ? 'var(--indigo)' : 'transparent'}`, transition: 'border-left-color 0.2s' }}>
+                <div key={order.id} className="lift-hover" style={{ borderBottom: '1px solid var(--bd-subtle)', borderLeft: `3px solid ${isExpanded ? 'var(--indigo)' : 'transparent'}`, transition: 'border-left-color 0.2s, transform 0.18s var(--ease-out), box-shadow 0.18s' }}>
 
                   {/* Row header */}
                   <div onClick={() => setExpanded(isExpanded ? null : order.id)} style={{ padding: '12px 16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -178,9 +295,18 @@ export default function Dashboard() {
                             {order.paymentStatus}
                           </span>
                         )}
+                        {isOverdue && (
+                          <span style={{ fontSize: 9, padding: '2px 7px', borderRadius: 99, background: 'rgba(244,63,94,0.1)', color: 'var(--rose)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.3px' }}>Overdue</span>
+                        )}
+                        {isDueToday && (
+                          <span style={{ fontSize: 9, padding: '2px 7px', borderRadius: 99, background: 'rgba(245,158,11,0.12)', color: 'var(--amber)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.3px' }}>Due Today</span>
+                        )}
                       </div>
                       <div style={{ fontSize: 11, color: 'var(--tx-secondary)', marginTop: 2 }}>
                         {order.customerNumber} · {new Date(order.orderDate).toLocaleDateString('en-IN')}
+                        {order.deliveryDate && (
+                          <span style={{ marginLeft: 6, ...urgStyle }}>· Delivery {order.deliveryDate}</span>
+                        )}
                       </div>
                     </div>
                     <div className="mono" style={{ fontSize: 15, fontWeight: 800, color: 'var(--tx-primary)', flexShrink: 0 }}>
@@ -243,7 +369,7 @@ export default function Dashboard() {
                         {order.totalGarments} garments
                         <span style={{ opacity: 0.4 }}>·</span>
                         <Truck size={11} style={{ opacity: 0.5, flexShrink: 0 }} />
-                        {order.deliveryDate}
+                        <span style={dateUrgency(order.deliveryDate, order.status)}>{order.deliveryDate}</span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
                         <CreditCard size={11} style={{ opacity: 0.5, flexShrink: 0 }} />
@@ -281,10 +407,10 @@ export default function Dashboard() {
 
                       <div className="action-row" style={{ marginTop: 10 }}>
                         {[
-                          { label: 'Edit',    icon: Pencil,  color: 'var(--indigo)',  bg: 'var(--indigo-dim)',  border: 'rgba(13,148,136,0.2)', action: e => { e.stopPropagation(); setEditOrder(order) } },
-                          { label: 'Receipt', icon: Printer, color: 'var(--emerald)', bg: 'var(--emerald-dim)', border: 'rgba(16,185,129,0.2)', action: e => { e.stopPropagation(); printReceipt(order) } },
-                          { label: 'Tags',    icon: Tag,     color: 'var(--sky)',     bg: 'rgba(14,165,233,0.1)', border: 'rgba(14,165,233,0.2)', action: e => { e.stopPropagation(); printTags(order) } },
-                          { label: 'Payment', icon: CreditCard, color: 'var(--amber)', bg: 'var(--amber-dim)', border: 'rgba(245,158,11,0.2)', action: e => { e.stopPropagation(); setPaymentModal(order) } },
+                          { label: 'Edit',    icon: Pencil,    color: 'var(--indigo)',  bg: 'var(--indigo-dim)',    border: 'rgba(13,148,136,0.2)',  action: e => { e.stopPropagation(); setEditOrder(order) } },
+                          { label: 'Receipt', icon: Printer,   color: 'var(--emerald)', bg: 'var(--emerald-dim)',   border: 'rgba(16,185,129,0.2)',  action: e => { e.stopPropagation(); printReceipt(order) } },
+                          { label: 'Tags',    icon: Tag,       color: 'var(--sky)',     bg: 'rgba(14,165,233,0.1)', border: 'rgba(14,165,233,0.2)',  action: e => { e.stopPropagation(); printTags(order) } },
+                          { label: 'Payment', icon: CreditCard,color: 'var(--amber)',   bg: 'var(--amber-dim)',     border: 'rgba(245,158,11,0.2)',  action: e => { e.stopPropagation(); setPaymentModal(order) } },
                         ].map(btn => (
                           <button key={btn.label} onClick={btn.action} style={{ padding: '6px 12px', borderRadius: 7, border: `1px solid ${btn.border}`, background: btn.bg, color: btn.color, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
                             <btn.icon size={12} strokeWidth={2} />
@@ -331,8 +457,7 @@ export default function Dashboard() {
                   display: 'flex', alignItems: 'center', gap: 8,
                 }}>
                   <Icon size={15} color={color} strokeWidth={2} />
-                  {s}
-                  {paymentModal.paymentStatus === s ? ' (current)' : ''}
+                  {s}{paymentModal.paymentStatus === s ? ' (current)' : ''}
                 </button>
               ))}
             </div>

@@ -136,6 +136,47 @@ body {
 .animate-pop-in   { animation: popIn 0.3s var(--ease-spring) both; }
 .animate-pulse    { animation: pulse 2s ease infinite; }
 
+/* ── Hover lift — stat cards & order rows ── */
+.lift-hover {
+  transition: transform 0.18s var(--ease-out), box-shadow 0.18s var(--ease-out);
+}
+.lift-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(26, 32, 16, 0.13);
+}
+
+/* ── Kanban card hover ── */
+.kanban-card {
+  transition: transform 0.15s var(--ease-out), box-shadow 0.15s var(--ease-out), border-color 0.15s;
+}
+.kanban-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(26, 32, 16, 0.10);
+  border-color: var(--bd-default);
+}
+
+/* ── Cart grand-total bump ── */
+@keyframes cartBump {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.16); }
+  65%  { transform: scale(0.97); }
+  100% { transform: scale(1); }
+}
+.cart-bump {
+  display: inline-block;
+  animation: cartBump 0.42s var(--ease-spring);
+}
+
+/* ── Kanban board layout ── */
+.kanban-board {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+@media (max-width: 900px) { .kanban-board { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .kanban-board { grid-template-columns: 1fr; } }
+
 /* ================================================================
    LAYOUT SYSTEM
 ================================================================ */
