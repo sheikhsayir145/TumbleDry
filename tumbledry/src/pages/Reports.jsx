@@ -56,7 +56,7 @@ export default function Reports() {
           totalGarments:   parseInt(row['Total Garments']) || 1,
           discountAmount:  parseFloat(row['Discount (₹)']) || 0,
           discountPct:     parseFloat(row['Discount %']) || 0,
-          orderDate:       (() => { try { const d = new Date(row['Order Date']); return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString() } catch { return new Date().toISOString() } })(),
+          orderDate:       row['Order Date'] ? new Date(row['Order Date']).toISOString() : new Date().toISOString(),
           deliveryDate:    row['Delivery Date'] || '',
           cart: [], deleted: false,
         })
@@ -96,7 +96,7 @@ export default function Reports() {
       `"${o.deliveryDate||''}"`,
       o.grandTotal,
       o.totalGarments,
-      new Date(o.orderDate).toISOString(),
+      new Date(o.orderDate).toLocaleString('en-IN'),
       o.status, o.serviceType, o.paymentMethod, o.paymentStatus,
       o.discountAmount||0, o.discountPct||0,
       `"${(o.customerAddress||'').replace(/"/g,'""')}"`,
