@@ -28,11 +28,28 @@ const STATUS_COLORS = {
   delivered: { bg: 'rgba(114,191,44,0.12)',  color: '#5FAD1A' },
 }
 
+const MONTH_IDX = { Jan:0, Feb:1, Mar:2, Apr:3, May:4, Jun:5, Jul:6, Aug:7, Sep:8, Oct:9, Nov:10, Dec:11 }
+
+function parseDeliveryDate(str) {
+  if (!str) return null
+  // Format stored by calcDeliveryDate: "19 May 26 Mon"
+  const parts = str.trim().split(' ')
+  const day   = parseInt(parts[0])
+  const month = MONTH_IDX[parts[1]]
+  const year  = 2000 + parseInt(parts[2])
+  if (isNaN(day) || month === undefined || isNaN(year)) return null
+  return new Date(year, month, day)
+}
+
 function dateUrgency(deliveryDate, status) {
   if (status === 'delivered' || !deliveryDate) return {}
-  const today = new Date().toISOString().split('T')[0]
-  if (deliveryDate < today) return { color: 'var(--rose)', fontWeight: 700 }
-  if (deliveryDate === today) return { color: 'var(--amber)', fontWeight: 700 }
+  const parsed = parseDeliveryDate(deliveryDate)
+  if (!parsed) return {}
+  const now   = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const diff  = parsed.getTime() - today.getTime()
+  if (diff < 0)  return { color: 'var(--rose)',  fontWeight: 700 }
+  if (diff === 0) return { color: 'var(--amber)', fontWeight: 700 }
   return {}
 }
 
