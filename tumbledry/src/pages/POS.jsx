@@ -2,10 +2,12 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useStore } from '../store/index.js'
-import { GARMENT_CATEGORIES, GARMENT_RATES, SERVICES, SERVICE_KG_RATES, isKgService, getNextTag, calcDeliveryDate } from '../lib/garments.js'
-import { printReceipt, printTags, printTagsInWindow, printReceiptInWindow } from '../lib/print.js'
+import {
+  GARMENT_CATEGORIES, GARMENT_RATES, SERVICES,
+  SERVICE_KG_RATES, isKgService, getNextTag, calcDeliveryDate
+} from '../lib/garments.js'
+import { printTagsInWindow, printReceiptInWindow } from '../lib/print.js'
 
-// Use custom rates if set in rate card editor, else fall back to defaults
 function getActiveRates() {
   try {
     const saved = JSON.parse(localStorage.getItem('td-custom-rates') || '{}')
@@ -20,46 +22,51 @@ function getActiveKgRates() {
   } catch { return SERVICE_KG_RATES }
 }
 
-export default function POS() {
-  const { orders, ordersLoading, upsertOrder, cart, addToCart, removeFromCart, clearCart, orderDiscount, setOrderDiscount } = useStore()
+const inp = {
+  width: '100%', padding: '10px 12px', borderRadius: 9,
+  border: '1.5px solid var(--bd-subtle)', fontSize: 14, fontFamily: 'inherit',
+  fontWeight: 500, background: 'var(--bg-input)', color: 'var(--tx-primary)',
+  outline: 'none', boxSizing: 'border-box',
+}
+const lbl = {
+  display: 'block', marginBottom: 5, fontSize: 11, fontWeight: 700,
+  color: 'var(--tx-secondary)', textTransform: 'uppercase', letterSpacing: '0.6px',
+}
 
-  const [customer, setCustomer]         = useState({ name:'', number:'', address:'', city:'', pincode:'' })
-  const [serviceType, setServiceType]   = useState('Dry Clean')
+export default function POS() {
+  const {
+    orders, upsertOrder,
+    cart, addToCart, removeFromCart, clearCart,
+    orderDiscount, setOrderDiscount,
+  } = useStore()
+
+  const [customer,      setCustomer]      = useState({ name:'', number:'', address:'', city:'', pincode:'' })
+  const [serviceType,   setServiceType]   = useState('Dry Clean')
   const [paymentMethod, setPaymentMethod] = useState('Cash')
   const [paymentStatus, setPaymentStatus] = useState('Paid')
-  const [tagNumber, setTagNumber]       = useState('')
-  const [deliveryDate, setDeliveryDate] = useState('')
-  const [suggestions, setSuggestions]   = useState([])
-  const [billingMode, setBillingMode]   = useState('piece')
+  const [tagNumber,     setTagNumber]     = useState('')
+  const [deliveryDate,  setDeliveryDate]  = useState('')
+  const [suggestions,   setSuggestions]   = useState([])
+  const [billingMode,   setBillingMode]   = useState('piece')
   const [garmentSearch, setGarmentSearch] = useState('')
-  const [showDropdown, setShowDropdown] = useState(false)
+  const [showDropdown,  setShowDropdown]  = useState(false)
   const [selectedGarment, setSelectedGarment] = useState(null)
-  const [itemQty, setItemQty]     = useState(1)
-  const [itemPrice, setItemPrice] = useState('')
-  const [itemDiscount, setItemDiscount] = useState(0)
-  const [kgWeight, setKgWeight]   = useState('')
-  const [kgPrice, setKgPrice]     = useState(90)
-  const [kgQty, setKgQty]         = useState(1)
-  const [showCustom, setShowCustom] = useState(false)
-  const [customName, setCustomName]   = useState('')
-  const [customPrice, setCustomPrice] = useState('')
-  const [customQty, setCustomQty]     = useState(1)
-  const [customDisc, setCustomDisc]   = useState(0)
-  const [toast, setToast]         = useState('')
+  const [itemQty,       setItemQty]       = useState(1)
+  const [itemPrice,     setItemPrice]     = useState('')
+  const [itemDiscount,  setItemDiscount]  = useState(0)
+  const [kgWeight,      setKgWeight]      = useState('')
+  const [kgPrice,       setKgPrice]       = useState(90)
+  const [kgQty,         setKgQty]         = useState(1)
+  const [showCustom,    setShowCustom]    = useState(false)
+  const [customName,    setCustomName]    = useState('')
+  const [customPrice,   setCustomPrice]   = useState('')
+  const [customQty,     setCustomQty]     = useState(1)
+  const [customDisc,    setCustomDisc]    = useState(0)
+  const [toast,         setToast]         = useState('')
   const dropdownRef = useRef(null)
 
-  // Update tag number whenever orders load or change
-  // This runs on mount AND after fetchOrders completes in App.jsx
-  useEffect(() => {
-    const nextTag = getNextTag(orders)
-    setTagNumber(nextTag)
-  }, [orders.length])
-
-  // Set delivery date once on mount
-  useEffect(() => {
-    setDeliveryDate(calcDeliveryDate())
-  }, [])
-
+  useEffect(() => { setTagNumber(getNextTag(orders)) }, [orders.length])
+  useEffect(() => { setDeliveryDate(calcDeliveryDate()) }, [])
   useEffect(() => {
     const h = e => { if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setShowDropdown(false) }
     document.addEventListener('mousedown', h)
@@ -83,18 +90,19 @@ export default function POS() {
       if (!seen[p] || o.orderDate > seen[p].orderDate) seen[p] = o
     })
     setSuggestions(Object.values(seen).filter(o =>
-      (o.customerName||'').toLowerCase().includes(val.toLowerCase()) || (o.customerNumber||'').includes(val)
+      (o.customerName || '').toLowerCase().includes(val.toLowerCase()) ||
+      (o.customerNumber || '').includes(val)
     ).slice(0, 6))
   }
 
   const activeRates = getActiveRates()
-  const allMatches = garmentSearch
+  const allMatches  = garmentSearch
     ? Object.entries(GARMENT_CATEGORIES).flatMap(([cat, items]) =>
-        items.filter(g => g.toLowerCase().includes(garmentSearch.toLowerCase()) && activeRates[g])
-             .map(g => ({ garment: g, rate: activeRates[g], cat }))
+        items
+          .filter(g => g.toLowerCase().includes(garmentSearch.toLowerCase()) && activeRates[g])
+          .map(g => ({ garment: g, rate: activeRates[g], cat }))
       )
     : []
-
   const grouped = allMatches.reduce((acc, { garment, rate, cat }) => {
     acc[cat] = acc[cat] || []
     acc[cat].push({ garment, rate })
@@ -105,7 +113,7 @@ export default function POS() {
     if (!selectedGarment) return showToast('Select a garment')
     if (!itemPrice) return showToast('Enter price')
     const price = parseFloat(itemPrice), qty = parseInt(itemQty) || 1
-    const gross = price * qty, discAmt = Math.round(gross * (parseInt(itemDiscount)||0) / 100)
+    const gross = price * qty, discAmt = Math.round(gross * (parseInt(itemDiscount) || 0) / 100)
     addToCart({ type:'piece', name:selectedGarment, printedTagName:selectedGarment, serviceName:serviceType, unitPrice:price, qty, discountPct:parseInt(itemDiscount)||0, discountAmount:discAmt, net:gross-discAmt })
     setGarmentSearch(''); setSelectedGarment(null); setItemPrice(''); setItemQty(1); setItemDiscount(0)
   }
@@ -121,16 +129,16 @@ export default function POS() {
   function addCustomItem() {
     if (!customName.trim()) return showToast('Enter item name')
     if (!customPrice) return showToast('Enter price')
-    const price = parseFloat(customPrice), qty = parseInt(customQty)||1
-    const gross = price * qty, discAmt = Math.round(gross * (parseInt(customDisc)||0) / 100)
+    const price = parseFloat(customPrice), qty = parseInt(customQty) || 1
+    const gross = price * qty, discAmt = Math.round(gross * (parseInt(customDisc) || 0) / 100)
     addToCart({ type:'piece', name:customName.trim(), printedTagName:customName.trim(), serviceName:serviceType, unitPrice:price, qty, discountPct:parseInt(customDisc)||0, discountAmount:discAmt, net:gross-discAmt })
     setCustomName(''); setCustomPrice(''); setCustomQty(1); setCustomDisc(0); setShowCustom(false)
   }
 
   async function processOrder() {
-    if (!customer.name) return showToast('Enter customer name')
+    if (!customer.name)   return showToast('Enter customer name')
     if (!customer.number) return showToast('Enter phone number')
-    if (!cart.length) return showToast('Cart is empty')
+    if (!cart.length)     return showToast('Cart is empty')
     const discPct = cartGross > 0 ? Math.round(totalDiscount / cartGross * 100 * 10) / 10 : 0
     const order = {
       id: String(Date.now()), customerName:customer.name, customerNumber:customer.number,
@@ -141,19 +149,17 @@ export default function POS() {
     }
     try {
       await upsertOrder(order)
-      // Open both print windows immediately (must be in same call stack as user click)
-      // then write content — browser allows window.open only during user gesture
       const tagsWin    = window.open('', '_blank', 'width=700,height=500')
       const receiptWin = window.open('', '_blank', 'width=300,height=600')
-      // Write tags
       printTagsInWindow(tagsWin, order)
-      // Write receipt
       printReceiptInWindow(receiptWin, order)
-      // WhatsApp after short delay
       setTimeout(() => sendWhatsApp(order), 600)
-      clearCart(); setCustomer({name:'',number:'',address:'',city:'',pincode:''}); setOrderDiscount(0)
-      setTagNumber(getNextTag([...orders, order])); setDeliveryDate(calcDeliveryDate())
-      showToast('✅ Order saved! Printing tags & receipt...')
+      clearCart()
+      setCustomer({ name:'', number:'', address:'', city:'', pincode:'' })
+      setOrderDiscount(0)
+      setTagNumber(getNextTag([...orders, order]))
+      setDeliveryDate(calcDeliveryDate())
+      showToast('✅ Order saved! Printing tags & receipt…')
     } catch(e) { showToast('❌ ' + e.message) }
   }
 
@@ -172,182 +178,327 @@ export default function POS() {
 
   function showToast(msg) { setToast(msg); setTimeout(() => setToast(''), 3000) }
 
-  const s = { input: { width:'100%', padding:'10px 14px', borderRadius:8, border:'1.5px solid var(--bd-subtle)', fontSize:14, fontFamily:'inherit', fontWeight:500, background:'var(--bg-input)', color:'var(--tx-primary)', outline:'none' }, label: { display:'block', marginBottom:6, fontSize:11, fontWeight:700, color:'var(--tx-secondary)', textTransform:'uppercase', letterSpacing:'0.5px' }, wrap: { marginBottom:14 } }
+  const sectionHead = { fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.8px', color: 'var(--tx-tertiary)', marginBottom: 14 }
+  const cardStyle   = { background: 'var(--bg-card)', border: '1px solid var(--bd-subtle)', borderRadius: 14, padding: 18, boxShadow: 'var(--shadow-sm)', marginBottom: 14 }
 
   return (
-    <div style={{ padding:24, maxWidth:820, margin:'0 auto' }}>
-      <div style={{ marginBottom:20, display:'flex', alignItems:'center', gap:16 }}>
-        <img src="/logo.png" alt="Tumbledry"
-          onError={e => { e.target.style.display='none' }}
-          style={{ height:56, width:'auto', objectFit:'contain' }} />
+    <div className="page" style={{ maxWidth: 820, margin: '0 auto' }}>
+
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 18 }}>
+        <img
+          src="/logo.png" alt="Tumbledry"
+          onError={e => { e.target.style.display = 'none' }}
+          style={{ height: 44, width: 'auto', objectFit: 'contain' }}
+        />
         <div>
-          <div style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.6px', color:'var(--tx-secondary)' }}>New Order</div>
-          <div style={{ fontSize:13, color:'var(--tx-secondary)', marginTop:2 }}>
-            Tag: <span style={{ fontFamily:'DM Mono', fontWeight:800, color:'var(--indigo)' }}>{tagNumber}</span>
+          <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.7px', color: 'var(--tx-tertiary)' }}>New Order</div>
+          <div style={{ fontSize: 13, color: 'var(--tx-secondary)', marginTop: 1 }}>
+            Tag: <span className="mono" style={{ fontWeight: 800, color: 'var(--indigo)', fontSize: 14 }}>{tagNumber}</span>
           </div>
         </div>
       </div>
 
-      <div style={{ display:'grid', gap:20 }}>
-        {/* Customer Card */}
-        <div style={{ background:'var(--bg-card)', border:'1px solid var(--bd-subtle)', borderRadius:16, padding:24, boxShadow:'var(--shadow-md)' }}>
-          <div style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.8px', color:'var(--tx-secondary)', marginBottom:16 }}>👤 Customer</div>
-          <div style={{ position:'relative', marginBottom:14 }}>
-            <label style={s.label}>Name / Search Previous Customer</label>
-            <input style={s.input} value={customer.name} onChange={e => handleCustomerSearch(e.target.value)} placeholder="Type name or phone..." />
-            {suggestions.length > 0 && (
-              <div style={{ position:'absolute', top:'100%', left:0, right:0, zIndex:50, background:'var(--bg-card)', border:'1px solid var(--bd-subtle)', borderRadius:8, boxShadow:'var(--shadow-lg)', overflow:'hidden' }}>
-                {suggestions.map(o => (
-                  <div key={o.customerNumber} onClick={() => { setCustomer({ name:o.customerName||'', number:o.customerNumber||'', address:o.customerAddress||'', city:o.customerCity||'', pincode:o.customerPincode||'' }); setSuggestions([]) }} style={{ padding:'10px 14px', cursor:'pointer', borderBottom:'1px solid var(--bd-subtle)' }}>
-                    <div style={{ fontWeight:700, fontSize:13, color:'var(--tx-primary)' }}>{o.customerName}</div>
-                    <div style={{ fontSize:11, color:'var(--tx-secondary)' }}>{o.customerNumber}{o.customerAddress?` · ${o.customerAddress}`:''}</div>
+      {/* ── Customer card ── */}
+      <div style={cardStyle}>
+        <div style={sectionHead}>👤 Customer</div>
+
+        {/* Name with autocomplete */}
+        <div style={{ position: 'relative', marginBottom: 12 }}>
+          <label style={lbl}>Name / Search Previous Customer</label>
+          <input
+            style={inp}
+            value={customer.name}
+            onChange={e => handleCustomerSearch(e.target.value)}
+            placeholder="Type name or phone…"
+          />
+          {suggestions.length > 0 && (
+            <div style={{
+              position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
+              background: 'var(--bg-card)', border: '1px solid var(--bd-subtle)',
+              borderRadius: 10, boxShadow: 'var(--shadow-lg)', overflow: 'hidden',
+              marginTop: 4,
+            }}>
+              {suggestions.map(o => (
+                <div
+                  key={o.customerNumber}
+                  onClick={() => {
+                    setCustomer({ name:o.customerName||'', number:o.customerNumber||'', address:o.customerAddress||'', city:o.customerCity||'', pincode:o.customerPincode||'' })
+                    setSuggestions([])
+                  }}
+                  style={{ padding: '10px 14px', cursor: 'pointer', borderBottom: '1px solid var(--bd-subtle)', transition: 'background 0.15s' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-raised)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >
+                  <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--tx-primary)' }}>{o.customerName}</div>
+                  <div style={{ fontSize: 11, color: 'var(--tx-secondary)', marginTop: 1 }}>
+                    {o.customerNumber}{o.customerAddress ? ` · ${o.customerAddress}` : ''}
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-            {[['Phone','number','10-digit number'],['Address','address','Street address'],['City','city','City'],['Pincode','pincode','6-digit pincode']].map(([lbl,key,ph]) => (
-              <div key={key} style={s.wrap}>
-                <label style={s.label}>{lbl}</label>
-                <input style={s.input} value={customer[key]} onChange={e => setCustomer(c => ({...c,[key]:e.target.value}))} placeholder={ph} />
-              </div>
-            ))}
-          </div>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12 }}>
-            <div style={s.wrap}><label style={s.label}>Tag Number</label><input style={s.input} value={tagNumber} onChange={e => setTagNumber(e.target.value)} /></div>
-            <div style={s.wrap}><label style={s.label}>Delivery Date</label><input style={s.input} value={deliveryDate} onChange={e => setDeliveryDate(e.target.value)} /></div>
-            <div style={s.wrap}><label style={s.label}>Service</label><select style={s.input} value={serviceType} onChange={e => {
-                const svc = e.target.value
-                setServiceType(svc)
-                // Auto-switch billing mode for KG services
-                if (isKgService(svc)) {
-                  setBillingMode('kg')
-                  const kgRates = getActiveKgRates()
-                  setKgPrice(kgRates[svc] || SERVICE_KG_RATES[svc] || 90)
-                } else {
-                  setBillingMode('piece')
-                }
-              }}>{SERVICES.map(sv => <option key={sv}>{sv}</option>)}</select></div>
-          </div>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-            <div style={s.wrap}><label style={s.label}>Payment Method</label><select style={s.input} value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)}><option>Cash</option><option>Online</option></select></div>
-            <div style={s.wrap}><label style={s.label}>Payment Status</label><select style={s.input} value={paymentStatus} onChange={e => setPaymentStatus(e.target.value)}><option>Paid</option><option>Pending</option><option>Partial</option></select></div>
-          </div>
-        </div>
-
-        {/* Cart Card */}
-        <div style={{ background:'var(--bg-card)', border:'1px solid var(--bd-subtle)', borderRadius:16, padding:24, boxShadow:'var(--shadow-md)' }}>
-          <div style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.8px', color:'var(--tx-secondary)', marginBottom:16 }}>🛒 Cart & Billing</div>
-
-          <div style={{ display:'flex', gap:8, marginBottom:16 }}>
-            {['piece','kg'].map(m => (
-              <button key={m} onClick={() => setBillingMode(m)} style={{ padding:'7px 16px', borderRadius:8, border:'none', cursor:'pointer', fontFamily:'inherit', fontWeight:600, fontSize:12, background:billingMode===m?'var(--indigo)':'var(--bg-raised)', color:billingMode===m?'white':'var(--tx-secondary)' }}>
-                {m==='piece'?'👕 Piece Billing':'⚖️ KG Billing'}
-              </button>
-            ))}
-          </div>
-
-          {billingMode === 'piece' && (
-            <>
-              <div style={{ display:'grid', gridTemplateColumns:'1fr 70px 90px 80px auto', gap:8, alignItems:'end', marginBottom:8 }}>
-                <div style={{ position:'relative' }} ref={dropdownRef}>
-                  <label style={s.label}>Garment</label>
-                  <input style={s.input} value={garmentSearch} onChange={e => { setGarmentSearch(e.target.value); setShowDropdown(true); setSelectedGarment(null) }} onFocus={() => setShowDropdown(true)} placeholder="Search garment..." />
-                  {showDropdown && Object.keys(grouped).length > 0 && (
-                    <div style={{ position:'absolute', top:'100%', left:0, right:0, zIndex:50, background:'var(--bg-card)', border:'1px solid var(--bd-subtle)', borderRadius:8, boxShadow:'var(--shadow-lg)', maxHeight:280, overflowY:'auto' }}>
-                      {Object.entries(grouped).map(([cat, items]) => (
-                        <div key={cat}>
-                          <div style={{ padding:'5px 12px', fontSize:10, fontWeight:800, textTransform:'uppercase', color:'var(--indigo)', background:'var(--bg-raised)', borderBottom:'1px solid var(--bd-subtle)' }}>{cat}</div>
-                          {items.map(({ garment, rate }) => (
-                            <div key={garment} onClick={() => { setSelectedGarment(garment); setItemPrice(rate); setGarmentSearch(garment); setShowDropdown(false) }} style={{ padding:'8px 12px', cursor:'pointer', display:'flex', justifyContent:'space-between', borderBottom:'1px solid var(--bd-subtle)', fontSize:13, color:'var(--tx-primary)' }}>
-                              <span>{garment}</span>
-                              <span style={{ color:'var(--indigo)', fontWeight:700, fontFamily:'DM Mono' }}>₹{rate}</span>
-                            </div>
-                          ))}
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
-                <div><label style={s.label}>Qty</label><input type="number" min="1" style={s.input} value={itemQty} onChange={e => setItemQty(e.target.value)} /></div>
-                <div><label style={s.label}>Price ₹</label><input type="number" style={s.input} value={itemPrice} onChange={e => setItemPrice(e.target.value)} /></div>
-                <div><label style={s.label}>Disc %</label><input type="number" min="0" max="100" style={s.input} value={itemDiscount} onChange={e => setItemDiscount(e.target.value)} /></div>
-                <button onClick={addPieceItem} style={{ padding:'10px 16px', borderRadius:8, border:'none', cursor:'pointer', fontFamily:'inherit', fontWeight:600, background:'linear-gradient(135deg,#10b981,#059669)', color:'white', marginBottom:14 }}>Add</button>
-              </div>
-
-              <button onClick={() => setShowCustom(v => !v)} style={{ fontSize:12, color:'var(--indigo)', background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', marginBottom:showCustom?10:16 }}>
-                {showCustom ? '▲ Hide custom item' : '+ Add custom item (not in list)'}
-              </button>
-              {showCustom && (
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 90px 70px 80px auto', gap:8, alignItems:'end', padding:'12px 14px', background:'var(--bg-raised)', borderRadius:8, border:'1px solid var(--bd-subtle)', marginBottom:12 }}>
-                  <div><label style={s.label}>Custom Item Name</label><input style={s.input} value={customName} onChange={e => setCustomName(e.target.value)} placeholder="e.g. Phiran, Abaya..." /></div>
-                  <div><label style={s.label}>Price ₹</label><input type="number" style={s.input} value={customPrice} onChange={e => setCustomPrice(e.target.value)} /></div>
-                  <div><label style={s.label}>Qty</label><input type="number" min="1" style={s.input} value={customQty} onChange={e => setCustomQty(e.target.value)} /></div>
-                  <div><label style={s.label}>Disc %</label><input type="number" min="0" max="100" style={s.input} value={customDisc} onChange={e => setCustomDisc(e.target.value)} /></div>
-                  <button onClick={addCustomItem} style={{ padding:'10px 16px', borderRadius:8, border:'none', cursor:'pointer', fontFamily:'inherit', fontWeight:600, background:'linear-gradient(135deg,#f59e0b,#d97706)', color:'white', marginBottom:14 }}>Add</button>
-                </div>
-              )}
-            </>
-          )}
-
-          {billingMode === 'kg' && (
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 90px 70px auto', gap:8, alignItems:'end', marginBottom:16 }}>
-              <div><label style={s.label}>Weight (KG)</label><input type="number" step="0.5" style={s.input} value={kgWeight} onChange={e => setKgWeight(e.target.value)} placeholder="e.g. 3.5" /></div>
-              <div><label style={s.label}>₹ per KG</label><input type="number" style={s.input} value={kgPrice} onChange={e => setKgPrice(e.target.value)} /></div>
-              <div><label style={s.label}>Pcs</label><input type="number" style={s.input} value={kgQty} onChange={e => setKgQty(e.target.value)} /></div>
-              <button onClick={addKgItem} style={{ padding:'10px 16px', borderRadius:8, border:'none', cursor:'pointer', fontFamily:'inherit', fontWeight:600, background:'linear-gradient(135deg,#10b981,#059669)', color:'white', marginBottom:14 }}>Add</button>
+              ))}
             </div>
           )}
+        </div>
 
-          {cart.length > 0 && (
-            <>
-              <div style={{ border:'1px solid var(--bd-subtle)', borderRadius:8, overflow:'hidden', marginBottom:14 }}>
-                <table style={{ width:'100%', borderCollapse:'collapse', fontSize:13 }}>
-                  <thead>
-                    <tr style={{ background:'var(--bg-raised)' }}>
-                      {['Item','Qty','Price','Disc','Net',''].map(h => <th key={h} style={{ padding:'8px 10px', textAlign:'left', fontSize:10, fontWeight:700, color:'var(--tx-secondary)', textTransform:'uppercase', letterSpacing:'0.5px', borderBottom:'1px solid var(--bd-subtle)' }}>{h}</th>)}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {cart.map((item, i) => (
-                      <tr key={i}>
-                        <td style={{ padding:'8px 10px', borderBottom:'1px solid var(--bd-subtle)', color:'var(--tx-primary)' }}>{item.name}</td>
-                        <td style={{ padding:'8px 10px', borderBottom:'1px solid var(--bd-subtle)', color:'var(--tx-primary)' }}>{item.qty}</td>
-                        <td style={{ padding:'8px 10px', borderBottom:'1px solid var(--bd-subtle)', fontFamily:'DM Mono', color:'var(--tx-primary)' }}>₹{item.unitPrice}</td>
-                        <td style={{ padding:'8px 10px', borderBottom:'1px solid var(--bd-subtle)', color:'var(--rose)' }}>{item.discountPct > 0 ? `${item.discountPct}%` : '—'}</td>
-                        <td style={{ padding:'8px 10px', borderBottom:'1px solid var(--bd-subtle)', fontFamily:'DM Mono', fontWeight:700, color:'var(--tx-primary)' }}>₹{Math.round(item.net)}</td>
-                        <td style={{ padding:'8px 10px', borderBottom:'1px solid var(--bd-subtle)' }}><button onClick={() => removeFromCart(i)} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--rose)', fontSize:16 }}>✕</button></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+        <div className="form-two">
+          {[
+            ['Phone',   'number',  '10-digit number'],
+            ['Address', 'address', 'Street address'],
+            ['City',    'city',    'City'],
+            ['Pincode', 'pincode', '6-digit pincode'],
+          ].map(([l, k, ph]) => (
+            <div key={k}>
+              <label style={lbl}>{l}</label>
+              <input style={inp} value={customer[k]} onChange={e => setCustomer(c => ({ ...c, [k]: e.target.value }))} placeholder={ph} />
+            </div>
+          ))}
+        </div>
 
-              <div style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 14px', background:'var(--bg-raised)', borderRadius:8, marginBottom:12, border:'1px solid var(--bd-subtle)' }}>
-                <span style={{ fontSize:13, fontWeight:600, color:'var(--tx-secondary)', flexShrink:0 }}>🏷️ Order Discount (%)</span>
-                <input type="number" min="0" max="100" value={orderDiscount} onChange={e => setOrderDiscount(parseFloat(e.target.value)||0)} style={{ width:80, padding:'7px 10px', borderRadius:6, border:'1px solid var(--bd-subtle)', fontFamily:'inherit', fontSize:14, background:'var(--bg-input)', color:'var(--tx-primary)', textAlign:'center', outline:'none' }} />
-                {orderLevelDisc > 0 && <span style={{ marginLeft:'auto', color:'var(--rose)', fontWeight:700, fontFamily:'DM Mono' }}>-₹{orderLevelDisc.toLocaleString()}</span>}
-              </div>
+        <div className="form-three">
+          <div>
+            <label style={lbl}>Tag Number</label>
+            <input style={inp} value={tagNumber} onChange={e => setTagNumber(e.target.value)} />
+          </div>
+          <div>
+            <label style={lbl}>Delivery Date</label>
+            <input style={inp} value={deliveryDate} onChange={e => setDeliveryDate(e.target.value)} />
+          </div>
+          <div>
+            <label style={lbl}>Service</label>
+            <select style={{ ...inp, cursor: 'pointer' }} value={serviceType} onChange={e => {
+              const svc = e.target.value
+              setServiceType(svc)
+              if (isKgService(svc)) {
+                setBillingMode('kg')
+                const kgRates = getActiveKgRates()
+                setKgPrice(kgRates[svc] || SERVICE_KG_RATES[svc] || 90)
+              } else {
+                setBillingMode('piece')
+              }
+            }}>
+              {SERVICES.map(sv => <option key={sv}>{sv}</option>)}
+            </select>
+          </div>
+        </div>
 
-              <div style={{ background:'linear-gradient(135deg,rgba(16,185,129,0.08),rgba(16,185,129,0.02))', border:'1.5px solid rgba(16,185,129,0.25)', borderRadius:10, padding:'16px 20px', marginBottom:16 }}>
-                {totalDiscount > 0 && <div style={{ display:'flex', justifyContent:'space-between', fontSize:13, color:'var(--rose)', marginBottom:6 }}><span>Total Discount</span><span style={{ fontFamily:'DM Mono', fontWeight:700 }}>-₹{totalDiscount.toLocaleString()}</span></div>}
-                <div style={{ display:'flex', justifyContent:'space-between', fontSize:13, color:'var(--tx-secondary)', marginBottom:8 }}><span>Total Garments</span><span style={{ fontWeight:700, color:'var(--tx-primary)' }}>{totalGarments}</span></div>
-                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                  <span style={{ fontSize:15, fontWeight:700, color:'var(--tx-secondary)' }}>Grand Total</span>
-                  <span style={{ fontSize:30, fontWeight:800, fontFamily:'DM Mono', color:'var(--emerald)', letterSpacing:'-1px' }}>₹{grandTotal.toLocaleString()}</span>
-                </div>
-              </div>
-
-              <button onClick={processOrder} style={{ width:'100%', padding:14, borderRadius:10, border:'none', cursor:'pointer', fontFamily:'inherit', fontWeight:700, fontSize:14, background:'linear-gradient(135deg,#6366f1,#4f46e5)', color:'white', boxShadow:'0 4px 20px rgba(99,102,241,0.25)' }}>
-                ✅ Process Order & Send WhatsApp
-              </button>
-            </>
-          )}
+        <div className="form-two">
+          <div>
+            <label style={lbl}>Payment Method</label>
+            <select style={{ ...inp, cursor: 'pointer' }} value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)}>
+              <option>Cash</option>
+              <option>Online</option>
+            </select>
+          </div>
+          <div>
+            <label style={lbl}>Payment Status</label>
+            <select style={{ ...inp, cursor: 'pointer' }} value={paymentStatus} onChange={e => setPaymentStatus(e.target.value)}>
+              <option>Paid</option>
+              <option>Pending</option>
+              <option>Partial</option>
+            </select>
+          </div>
         </div>
       </div>
 
-      {toast && <div style={{ position:'fixed', bottom:24, right:24, background:'var(--bg-card)', border:'1px solid var(--bd-subtle)', borderLeft:'3px solid var(--indigo)', borderRadius:10, padding:'10px 18px', boxShadow:'var(--shadow-lg)', fontSize:13, fontWeight:600, zIndex:9999, color:'var(--tx-primary)' }}>{toast}</div>}
+      {/* ── Cart card ── */}
+      <div style={cardStyle}>
+        <div style={sectionHead}>🛒 Cart & Billing</div>
+
+        {/* Billing mode toggle */}
+        <div style={{ display: 'flex', gap: 6, marginBottom: 16, background: 'var(--bg-raised)', padding: 4, borderRadius: 10, width: 'fit-content', border: '1px solid var(--bd-subtle)' }}>
+          {['piece', 'kg'].map(m => (
+            <button key={m} onClick={() => setBillingMode(m)} style={{
+              padding: '7px 16px', borderRadius: 7, border: 'none', cursor: 'pointer',
+              fontFamily: 'inherit', fontWeight: 700, fontSize: 12,
+              background: billingMode === m ? 'var(--bg-card)' : 'transparent',
+              color: billingMode === m ? 'var(--indigo)' : 'var(--tx-secondary)',
+              boxShadow: billingMode === m ? 'var(--shadow-sm)' : 'none',
+              transition: 'all 0.15s',
+            }}>
+              {m === 'piece' ? '👕 Piece' : '⚖️ KG'}
+            </button>
+          ))}
+        </div>
+
+        {/* Piece billing */}
+        {billingMode === 'piece' && (
+          <>
+            <div className="pos-add-row">
+              <div style={{ position: 'relative' }} ref={dropdownRef}>
+                <label style={lbl}>Garment</label>
+                <input
+                  style={inp}
+                  value={garmentSearch}
+                  onChange={e => { setGarmentSearch(e.target.value); setShowDropdown(true); setSelectedGarment(null) }}
+                  onFocus={() => setShowDropdown(true)}
+                  placeholder="Search garment…"
+                />
+                {showDropdown && Object.keys(grouped).length > 0 && (
+                  <div style={{
+                    position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
+                    background: 'var(--bg-card)', border: '1px solid var(--bd-subtle)',
+                    borderRadius: 10, boxShadow: 'var(--shadow-lg)', maxHeight: 260, overflowY: 'auto',
+                    marginTop: 4,
+                  }}>
+                    {Object.entries(grouped).map(([cat, items]) => (
+                      <div key={cat}>
+                        <div style={{ padding: '5px 12px', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', color: 'var(--indigo)', background: 'var(--bg-raised)', borderBottom: '1px solid var(--bd-subtle)', letterSpacing: '0.5px' }}>
+                          {cat}
+                        </div>
+                        {items.map(({ garment, rate }) => (
+                          <div
+                            key={garment}
+                            onClick={() => { setSelectedGarment(garment); setItemPrice(rate); setGarmentSearch(garment); setShowDropdown(false) }}
+                            style={{ padding: '9px 12px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--bd-subtle)', fontSize: 13, color: 'var(--tx-primary)', transition: 'background 0.1s' }}
+                            onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-raised)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                          >
+                            <span>{garment}</span>
+                            <span className="mono" style={{ color: 'var(--indigo)', fontWeight: 700 }}>₹{rate}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div><label style={lbl}>Qty</label><input type="number" min="1" style={inp} value={itemQty} onChange={e => setItemQty(e.target.value)} /></div>
+              <div><label style={lbl}>Price ₹</label><input type="number" style={inp} value={itemPrice} onChange={e => setItemPrice(e.target.value)} /></div>
+              <div><label style={lbl}>Disc %</label><input type="number" min="0" max="100" style={inp} value={itemDiscount} onChange={e => setItemDiscount(e.target.value)} /></div>
+
+              <button onClick={addPieceItem} style={{
+                padding: '10px 16px', borderRadius: 9, border: 'none', cursor: 'pointer',
+                fontFamily: 'inherit', fontWeight: 700, fontSize: 13,
+                background: 'linear-gradient(135deg,#059669,#10B981)', color: 'white',
+                marginBottom: 14, whiteSpace: 'nowrap',
+              }}>
+                + Add
+              </button>
+            </div>
+
+            <button onClick={() => setShowCustom(v => !v)} style={{ fontSize: 12, color: 'var(--indigo)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600, marginBottom: showCustom ? 10 : 16, padding: '0', textDecoration: 'underline', textUnderlineOffset: 2 }}>
+              {showCustom ? '▲ Hide custom item' : '+ Add custom item (not in list)'}
+            </button>
+
+            {showCustom && (
+              <div style={{ background: 'var(--bg-raised)', borderRadius: 10, padding: 14, border: '1px solid var(--bd-subtle)', marginBottom: 12 }}>
+                <div className="pos-add-row-custom">
+                  <div><label style={lbl}>Custom Item Name</label><input style={inp} value={customName} onChange={e => setCustomName(e.target.value)} placeholder="e.g. Phiran, Abaya…" /></div>
+                  <div><label style={lbl}>Price ₹</label><input type="number" style={inp} value={customPrice} onChange={e => setCustomPrice(e.target.value)} /></div>
+                  <div><label style={lbl}>Qty</label><input type="number" min="1" style={inp} value={customQty} onChange={e => setCustomQty(e.target.value)} /></div>
+                  <div><label style={lbl}>Disc %</label><input type="number" min="0" max="100" style={inp} value={customDisc} onChange={e => setCustomDisc(e.target.value)} /></div>
+                  <button onClick={addCustomItem} style={{ padding: '10px 14px', borderRadius: 9, border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: 13, background: 'linear-gradient(135deg,#D97706,#F59E0B)', color: 'white', marginBottom: 14, whiteSpace: 'nowrap' }}>
+                    + Add
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* KG billing */}
+        {billingMode === 'kg' && (
+          <div className="pos-kg-row">
+            <div><label style={lbl}>Weight (KG)</label><input type="number" step="0.5" style={inp} value={kgWeight} onChange={e => setKgWeight(e.target.value)} placeholder="e.g. 3.5" /></div>
+            <div><label style={lbl}>₹ per KG</label><input type="number" style={inp} value={kgPrice} onChange={e => setKgPrice(e.target.value)} /></div>
+            <div><label style={lbl}>Pcs</label><input type="number" style={inp} value={kgQty} onChange={e => setKgQty(e.target.value)} /></div>
+            <button onClick={addKgItem} style={{ padding: '10px 14px', borderRadius: 9, border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: 13, background: 'linear-gradient(135deg,#059669,#10B981)', color: 'white', marginBottom: 14, whiteSpace: 'nowrap' }}>
+              + Add
+            </button>
+          </div>
+        )}
+
+        {/* Cart items */}
+        {cart.length > 0 && (
+          <>
+            <div style={{ border: '1px solid var(--bd-subtle)', borderRadius: 10, overflow: 'hidden', marginBottom: 14 }}>
+              {/* Table header (desktop) */}
+              <div className="hide-mobile" style={{ display: 'grid', gridTemplateColumns: '1fr 48px 80px 60px 80px 32px', padding: '8px 12px', background: 'var(--bg-raised)', borderBottom: '1px solid var(--bd-subtle)', fontSize: 10, fontWeight: 700, color: 'var(--tx-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', gap: 8 }}>
+                <div>Item</div><div>Qty</div><div>Price</div><div>Disc</div><div>Net</div><div />
+              </div>
+
+              {cart.map((item, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px', borderBottom: i < cart.length - 1 ? '1px solid var(--bd-subtle)' : 'none', flexWrap: 'wrap' }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.name}</div>
+                    <div className="hide-desktop" style={{ fontSize: 11, color: 'var(--tx-secondary)', marginTop: 2 }}>
+                      Qty: {item.qty} · ₹{item.unitPrice}{item.discountPct > 0 ? ` · ${item.discountPct}% off` : ''}
+                    </div>
+                  </div>
+                  <div className="hide-mobile" style={{ width: 48, fontSize: 13, color: 'var(--tx-secondary)' }}>{item.qty}</div>
+                  <div className="hide-mobile mono" style={{ width: 80, fontSize: 13, color: 'var(--tx-secondary)' }}>₹{item.unitPrice}</div>
+                  <div className="hide-mobile" style={{ width: 60, fontSize: 12, color: 'var(--rose)' }}>{item.discountPct > 0 ? `${item.discountPct}%` : '—'}</div>
+                  <div className="mono" style={{ fontSize: 13, fontWeight: 700, color: 'var(--tx-primary)', minWidth: 60, textAlign: 'right' }}>₹{Math.round(item.net)}</div>
+                  <button onClick={() => removeFromCart(i)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--rose)', fontSize: 18, padding: '0 4px', lineHeight: 1, minHeight: 'auto', flexShrink: 0 }}>✕</button>
+                </div>
+              ))}
+            </div>
+
+            {/* Order discount */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'var(--bg-raised)', borderRadius: 9, marginBottom: 12, border: '1px solid var(--bd-subtle)', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx-secondary)', flexShrink: 0 }}>🏷️ Order Discount (%)</span>
+              <input
+                type="number" min="0" max="100"
+                value={orderDiscount}
+                onChange={e => setOrderDiscount(parseFloat(e.target.value) || 0)}
+                style={{ width: 72, padding: '7px 10px', borderRadius: 7, border: '1px solid var(--bd-subtle)', fontFamily: 'inherit', fontSize: 14, background: 'var(--bg-input)', color: 'var(--tx-primary)', textAlign: 'center', outline: 'none' }}
+              />
+              {orderLevelDisc > 0 && (
+                <span className="mono" style={{ marginLeft: 'auto', color: 'var(--rose)', fontWeight: 700 }}>-₹{orderLevelDisc.toLocaleString()}</span>
+              )}
+            </div>
+
+            {/* Bill summary */}
+            <div style={{ background: 'linear-gradient(135deg, rgba(13,148,136,0.07), rgba(13,148,136,0.03))', border: '1.5px solid rgba(13,148,136,0.2)', borderRadius: 12, padding: '16px 18px', marginBottom: 16 }}>
+              {totalDiscount > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--rose)', marginBottom: 6 }}>
+                  <span>Total Discount</span>
+                  <span className="mono" style={{ fontWeight: 700 }}>-₹{totalDiscount.toLocaleString()}</span>
+                </div>
+              )}
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--tx-secondary)', marginBottom: 8 }}>
+                <span>Total Garments</span>
+                <span style={{ fontWeight: 700, color: 'var(--tx-primary)' }}>{totalGarments}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--tx-secondary)' }}>Grand Total</span>
+                <span className="mono" style={{ fontSize: 32, fontWeight: 800, color: 'var(--indigo)', letterSpacing: '-1px' }}>₹{grandTotal.toLocaleString()}</span>
+              </div>
+            </div>
+
+            <button onClick={processOrder} style={{
+              width: '100%', padding: 14, borderRadius: 10, border: 'none', cursor: 'pointer',
+              fontFamily: 'inherit', fontWeight: 800, fontSize: 14,
+              background: 'linear-gradient(135deg, #0D9488, #14B8A6)',
+              color: 'white', boxShadow: 'var(--shadow-teal)',
+              letterSpacing: '0.1px',
+            }}>
+              ✅ Process Order & Send WhatsApp
+            </button>
+          </>
+        )}
+
+        {cart.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '28px 0 8px', color: 'var(--tx-tertiary)', fontSize: 13 }}>
+            Add items above to build the cart
+          </div>
+        )}
+      </div>
+
+      {/* Toast */}
+      {toast && (
+        <div style={{
+          position: 'fixed', bottom: 80, right: 16, zIndex: 9999,
+          background: 'var(--bg-card)', border: '1px solid var(--bd-subtle)',
+          borderLeft: '3px solid var(--indigo)', borderRadius: 10,
+          padding: '10px 16px', boxShadow: 'var(--shadow-lg)',
+          fontSize: 13, fontWeight: 600, color: 'var(--tx-primary)',
+          animation: 'fadeUp 0.25s var(--ease-out)',
+        }}>
+          {toast}
+        </div>
+      )}
     </div>
   )
 }

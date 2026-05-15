@@ -1,83 +1,148 @@
 // src/components/Layout.jsx
 
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
+import { useState } from 'react'
 import { useStore } from '../store/index.js'
 import { logout } from '../pages/Login.jsx'
 
-const NAV = [
-  { path:'/',           icon:'🧾', label:'POS'              },
-  { path:'/dashboard',  icon:'📊', label:'Dashboard'        },
-  { path:'/analytics',  icon:'📈', label:'Analytics'        },
-  { path:'/pending',    icon:'💳', label:'Pending Payments' },
-  { path:'/customers',  icon:'👥', label:'Customers'        },
-  { path:'/reports',    icon:'📄', label:'Reports'          },
-  { path:'/rates',      icon:'💰', label:'Rate Card'        },
-  { path:'/attendance', icon:'👷', label:'Attendance'       },
+const NAV_PRIMARY = [
+  { path: '/',           icon: '🧾', label: 'POS'      },
+  { path: '/dashboard',  icon: '📊', label: 'Dashboard' },
+  { path: '/pending',    icon: '💳', label: 'Payments'  },
+  { path: '/customers',  icon: '👥', label: 'Customers' },
 ]
+
+const NAV_MORE = [
+  { path: '/analytics',  icon: '📈', label: 'Analytics'   },
+  { path: '/reports',    icon: '📄', label: 'Reports'      },
+  { path: '/rates',      icon: '💰', label: 'Rate Card'    },
+  { path: '/attendance', icon: '👷', label: 'Attendance'   },
+]
+
+const NAV_ALL = [...NAV_PRIMARY, ...NAV_MORE]
 
 export default function Layout({ children }) {
   const { darkMode, toggleDark, ordersLoading } = useStore()
+  const [moreOpen, setMoreOpen] = useState(false)
+  const location = useLocation()
+  const isMoreActive = NAV_MORE.some(n => location.pathname === n.path)
 
   return (
-    <div style={{ display:'flex', height:'100vh', overflow:'hidden' }}>
+    <div className="app-layout">
 
-      {/* Sidebar */}
-      <aside style={{
-        width: 64,
-        background: 'var(--bg-card)',
-        borderRight: '1px solid var(--bd-subtle)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        padding: '16px 0',
-        gap: 6,
-        flexShrink: 0,
-        zIndex: 100,
-        overflowY: 'auto',
-      }}>
+      {/* ── Desktop Sidebar ── */}
+      <aside className="app-sidebar">
+        {/* Logo */}
+        <div className="nav-logo">
+          <span className="nav-logo-icon">👕</span>
+          <span className="nav-logo-text">Tumbledry</span>
+        </div>
 
-        {/* Logo mark — small icon only in sidebar */}
-        <div style={{ fontSize: 26, marginBottom: 14, flexShrink: 0 }}>👕</div>
+        <div className="nav-section-label">Menu</div>
 
-        {/* Nav */}
-        {NAV.map(item => (
-          <NavLink key={item.path} to={item.path} end={item.path==='/'} title={item.label}
-            style={({isActive}) => ({
-              width: 44, height: 44, borderRadius: 10,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 20, textDecoration: 'none', flexShrink: 0,
-              background: isActive ? 'rgba(99,102,241,0.15)' : 'transparent',
-              border: isActive ? '1px solid rgba(99,102,241,0.25)' : '1px solid transparent',
-              transition: 'var(--transition)',
-            })}>
-            {item.icon}
+        {NAV_ALL.map(item => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            end={item.path === '/'}
+            className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+          >
+            <span className="nav-item-icon">{item.icon}</span>
+            {item.label}
           </NavLink>
         ))}
 
         {/* Bottom controls */}
-        <div style={{ marginTop:'auto', display:'flex', flexDirection:'column', gap:6, paddingTop:8 }}>
-          <button onClick={toggleDark} title={darkMode ? 'Light mode' : 'Dark mode'}
-            style={{ width:44, height:44, borderRadius:10, background:'var(--bg-raised)', border:'1px solid var(--bd-subtle)', cursor:'pointer', fontSize:18, display:'flex', alignItems:'center', justifyContent:'center' }}>
-            {darkMode ? '☀️' : '🌙'}
+        <div style={{ marginTop: 'auto', paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div style={{ height: 1, background: 'var(--bd-subtle)', margin: '4px 0 8px' }} />
+          <button
+            onClick={toggleDark}
+            className="nav-item"
+            title={darkMode ? 'Light mode' : 'Dark mode'}
+          >
+            <span className="nav-item-icon">{darkMode ? '☀️' : '🌙'}</span>
+            {darkMode ? 'Light Mode' : 'Dark Mode'}
           </button>
-          <button onClick={logout} title="Sign out"
-            style={{ width:44, height:44, borderRadius:10, background:'rgba(244,63,94,0.08)', border:'1px solid rgba(244,63,94,0.15)', cursor:'pointer', fontSize:18, display:'flex', alignItems:'center', justifyContent:'center' }}>
-            🚪
+          <button onClick={logout} className="nav-item" style={{ color: 'var(--rose)' }}>
+            <span className="nav-item-icon">🚪</span>
+            Sign Out
           </button>
         </div>
       </aside>
 
-      {/* Main */}
-      <main style={{ flex:1, overflow:'auto', background:'var(--bg-base)' }}>
-        {/* Loading bar */}
+      {/* ── Main content ── */}
+      <main className="app-main">
         {ordersLoading && (
-          <div style={{ position:'fixed', top:0, left:64, right:0, height:3, zIndex:999 }}>
-            <div style={{ height:3, background:'linear-gradient(90deg,#6366f1,#10b981,#6366f1)', backgroundSize:'200% 100%', animation:'loadingBar 1.5s ease infinite' }} />
+          <div className="loading-bar-wrap">
+            <div className="loading-bar" />
           </div>
         )}
-        <style>{`@keyframes loadingBar { 0%{background-position:200% 0} 100%{background-position:-200% 0} }`}</style>
         {children}
       </main>
+
+      {/* ── Mobile Bottom Nav ── */}
+      <nav className="app-bottom-nav">
+        <div className="bottom-nav-inner">
+          {NAV_PRIMARY.map(item => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              end={item.path === '/'}
+              className={({ isActive }) => `bottom-nav-item${isActive ? ' active' : ''}`}
+            >
+              <span className="bn-icon">{item.icon}</span>
+              <span className="bn-label">{item.label}</span>
+            </NavLink>
+          ))}
+          <button
+            className={`bottom-nav-item${isMoreActive ? ' active' : ''}`}
+            onClick={() => setMoreOpen(true)}
+          >
+            <span className="bn-icon">⋯</span>
+            <span className="bn-label">More</span>
+          </button>
+        </div>
+      </nav>
+
+      {/* ── More sheet (mobile) ── */}
+      {moreOpen && (
+        <>
+          <div className="sheet-overlay" onClick={() => setMoreOpen(false)} />
+          <div className="sheet-panel">
+            <div className="sheet-handle" />
+            <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.7px', color: 'var(--tx-tertiary)', marginBottom: 14 }}>More Pages</div>
+            <div className="sheet-grid">
+              {NAV_MORE.map(item => (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  className={({ isActive }) => `sheet-nav-item${isActive ? ' active' : ''}`}
+                  onClick={() => setMoreOpen(false)}
+                >
+                  <span className="sheet-nav-icon">{item.icon}</span>
+                  {item.label}
+                </NavLink>
+              ))}
+            </div>
+
+            {/* Sheet bottom controls */}
+            <div style={{ marginTop: 16, display: 'flex', gap: 8 }}>
+              <button
+                onClick={() => { toggleDark(); setMoreOpen(false) }}
+                style={{ flex: 1, padding: '12px', borderRadius: 10, background: 'var(--bg-raised)', border: '1px solid var(--bd-subtle)', fontFamily: 'inherit', fontWeight: 600, fontSize: 13, cursor: 'pointer', color: 'var(--tx-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+              >
+                {darkMode ? '☀️' : '🌙'} {darkMode ? 'Light' : 'Dark'}
+              </button>
+              <button
+                onClick={() => { logout(); setMoreOpen(false) }}
+                style={{ flex: 1, padding: '12px', borderRadius: 10, background: 'var(--rose-dim)', border: '1px solid rgba(244,63,94,0.2)', fontFamily: 'inherit', fontWeight: 600, fontSize: 13, cursor: 'pointer', color: 'var(--rose)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+              >
+                🚪 Sign Out
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }
