@@ -99,20 +99,11 @@ export default function Login({ onLogin }) {
 
         {/* Branding */}
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <div style={{
-            width: 64,
-            height: 64,
-            borderRadius: 18,
-            background: 'linear-gradient(135deg, #0D9488, #14B8A6)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 30,
-            margin: '0 auto 16px',
-            boxShadow: 'var(--shadow-teal)',
-          }}>
-            👕
-          </div>
+          <img
+            src="/logo.png"
+            alt="Tumbledry"
+            style={{ width: 72, height: 72, objectFit: 'contain', margin: '0 auto 16px', display: 'block' }}
+          />
           <h1 style={{
             fontSize: 26,
             fontWeight: 800,

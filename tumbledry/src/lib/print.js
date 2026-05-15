@@ -90,13 +90,13 @@ export function printTags(order) {
   const svcCode = getServiceCode(order.serviceType)
 
   // Total garments across entire order
-  const totalGarments = items.reduce((s, i) => s + (i.type === 'kg' ? 1 : (i.qty || 1)), 0)
+  const totalGarments = items.reduce((s, i) => s + (i.qty || 1), 0)
 
   // Build one tag per garment piece
   const tags = []
   let globalNum = 0
   items.forEach(item => {
-    const count = item.type === 'kg' ? 1 : (item.qty || 1)
+    const count = item.qty || 1
     for (let i = 0; i < count; i++) {
       globalNum++
       tags.push({
@@ -243,12 +243,12 @@ export function printTagsInWindow(win, order) {
   if (!win) return
   const items = order.cart || []
   const svcCode = getServiceCode(order.serviceType)
-  const totalGarments = items.reduce((s, i) => s + (i.type === 'kg' ? 1 : (i.qty || 1)), 0)
+  const totalGarments = items.reduce((s, i) => s + (i.qty || 1), 0)
 
   const tags = []
   let globalNum = 0
   items.forEach(item => {
-    const count = item.type === 'kg' ? 1 : (item.qty || 1)
+    const count = item.qty || 1
     for (let i = 0; i < count; i++) {
       globalNum++
       tags.push({
