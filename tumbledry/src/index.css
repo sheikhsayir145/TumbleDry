@@ -130,18 +130,6 @@ body {
 
 @keyframes popIn   { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
-/* Single wandering bubble — traces a slow organic figure-8 across the screen */
-@keyframes bubbleWander {
-  0%   { transform: translate(18vw,  32vh); }
-  12%  { transform: translate(52vw,  14vh); }
-  24%  { transform: translate(68vw,  48vh); }
-  36%  { transform: translate(44vw,  66vh); }
-  50%  { transform: translate(14vw,  55vh); }
-  62%  { transform: translate(6vw,   22vh); }
-  74%  { transform: translate(32vw,  8vh);  }
-  88%  { transform: translate(60vw,  38vh); }
-  100% { transform: translate(18vw,  32vh); }
-}
 
 .animate-fade-up  { animation: fadeUp 0.35s var(--ease-out) both; }
 .animate-fade-in  { animation: fadeIn 0.25s ease both; }
@@ -179,64 +167,10 @@ html.dark .app-sidebar {
   border-right-color: rgba(95, 173, 26, 0.12);
 }
 
-/* Soap-bubble / droplet repeating pattern for main canvas — static grid */
 .app-main {
   flex: 1;
   overflow: auto;
   background-color: var(--bg-base);
-  background-image:
-    radial-gradient(circle, rgba(95,173,26,0.28)  3px,   transparent 3px),
-    radial-gradient(circle, rgba(252,194,0,0.20)  2px,   transparent 2px);
-  background-size: 32px 32px, 20px 20px;
-  background-position: 0 0, 16px 10px;
-  position: relative;
-}
-
-html.dark .app-main {
-  background-color: var(--bg-base);
-  background-image:
-    radial-gradient(circle, rgba(114,191,44,0.22) 3px,   transparent 3px),
-    radial-gradient(circle, rgba(252,194,0,0.14)  2px,   transparent 2px);
-  background-size: 32px 32px, 20px 20px;
-  background-position: 0 0, 16px 10px;
-}
-
-/* ── Solo wandering bubble ── */
-.solo-bubble {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 1;
-  will-change: transform;
-  animation: bubbleWander 30s ease-in-out infinite;
-  /* Soap-bubble look: bright glint at top-left, brand-green body, soft glow */
-  background: radial-gradient(
-    circle at 35% 30%,
-    rgba(255, 255, 255, 0.90) 0%,
-    rgba(114, 191, 44, 0.55) 38%,
-    rgba(114, 191, 44, 0.22) 68%,
-    transparent 100%
-  );
-  box-shadow:
-    0 0 18px 6px rgba(114, 191, 44, 0.18),
-    0 0  6px 2px rgba(255, 255, 255, 0.35) inset;
-}
-
-html.dark .solo-bubble {
-  background: radial-gradient(
-    circle at 35% 30%,
-    rgba(255, 255, 255, 0.80) 0%,
-    rgba(114, 191, 44, 0.60) 38%,
-    rgba(114, 191, 44, 0.28) 68%,
-    transparent 100%
-  );
-  box-shadow:
-    0 0 22px 8px rgba(114, 191, 44, 0.22),
-    0 0  6px 2px rgba(255, 255, 255, 0.30) inset;
 }
 
 /* ── Sidebar nav items ── */
