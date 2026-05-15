@@ -118,10 +118,24 @@ export default function Analytics() {
     { label: '30+ Days',  color: 'var(--rose)',    bg: 'rgba(244,63,94,0.08)', orders: pending.filter(o => (Date.now()-new Date(o.orderDate))/86400000 > 30) },
   ]
 
+  // ── Peak hours heatmap ─────────────────────────────────────
+  const DAYS   = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
+  const SLOTS  = ['8–10','10–12','12–14','14–16','16–18','18–20','20+']
+  const heatmap = Array.from({length:7}, () => Array(7).fill(0))
+  active.forEach(o => {
+    const d   = new Date(o.orderDate)
+    const dow = (d.getDay() + 6) % 7          // 0=Mon … 6=Sun
+    const hr  = d.getHours()
+    const slot = hr < 10 ? 0 : hr < 12 ? 1 : hr < 14 ? 2 : hr < 16 ? 3 : hr < 18 ? 4 : hr < 20 ? 5 : 6
+    heatmap[dow][slot]++
+  })
+  const heatMax = Math.max(1, ...heatmap.flat())
+
   const TABS = [
     { id: 'performance', label: '📊 Performance' },
     { id: 'revenue',     label: '💰 Revenue'     },
     { id: 'insights',    label: '🔍 Insights'    },
+    { id: 'heatmap',     label: '🕐 Peak Hours'  },
   ]
 
   if (ordersLoading) return <div style={{ display:'flex', justifyContent:'center', padding:80 }}><Spinner size={40} /></div>
@@ -210,6 +224,56 @@ export default function Analytics() {
             </div>
           </Card>
         </div>
+      )}
+
+      {/* ── Heatmap Tab ── */}
+      {tab === 'heatmap' && (
+        <Card>
+          <div style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.6px', color:'var(--tx-tertiary)', marginBottom:6 }}>🕐 Orders by Day & Time</div>
+          <div style={{ fontSize:12, color:'var(--tx-secondary)', marginBottom:18 }}>Darker = more orders at that time</div>
+          <div style={{ overflowX:'auto' }}>
+            <table style={{ borderCollapse:'separate', borderSpacing:4, minWidth:420 }}>
+              <thead>
+                <tr>
+                  <th style={{ width:40, fontSize:10, fontWeight:700, color:'var(--tx-tertiary)', textAlign:'left', paddingBottom:6 }} />
+                  {SLOTS.map(s => (
+                    <th key={s} style={{ fontSize:10, fontWeight:700, color:'var(--tx-tertiary)', textAlign:'center', paddingBottom:6, whiteSpace:'nowrap' }}>{s}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {DAYS.map((day, di) => (
+                  <tr key={day}>
+                    <td style={{ fontSize:11, fontWeight:700, color:'var(--tx-secondary)', paddingRight:8, whiteSpace:'nowrap' }}>{day}</td>
+                    {heatmap[di].map((count, si) => {
+                      const intensity = count / heatMax
+                      const bg = count === 0
+                        ? 'var(--bg-raised)'
+                        : `rgba(13,148,136,${0.1 + intensity * 0.85})`
+                      const color = intensity > 0.5 ? 'white' : count > 0 ? 'var(--indigo)' : 'var(--tx-tertiary)'
+                      return (
+                        <td key={si} title={`${day} ${SLOTS[si]}: ${count} orders`} style={{
+                          width:52, height:38, borderRadius:7, background:bg,
+                          textAlign:'center', fontSize:11, fontWeight:700, color,
+                          cursor:'default', transition:'background 0.2s',
+                        }}>
+                          {count > 0 ? count : ''}
+                        </td>
+                      )
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div style={{ display:'flex', alignItems:'center', gap:8, marginTop:16, fontSize:11, color:'var(--tx-tertiary)' }}>
+            <span>Low</span>
+            {[0.1,0.3,0.5,0.7,0.9].map(v => (
+              <div key={v} style={{ width:20, height:14, borderRadius:4, background:`rgba(13,148,136,${v})` }} />
+            ))}
+            <span>High</span>
+          </div>
+        </Card>
       )}
 
       {/* ── Insights Tab ── */}

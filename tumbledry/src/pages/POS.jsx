@@ -62,6 +62,9 @@ export default function POS() {
   const [customPrice,   setCustomPrice]   = useState('')
   const [customQty,     setCustomQty]     = useState(1)
   const [customDisc,    setCustomDisc]    = useState(0)
+  const [rackLocation,  setRackLocation]  = useState('')
+  const [cashAmount,    setCashAmount]    = useState('')
+  const [onlineAmount,  setOnlineAmount]  = useState('')
   const [toast,         setToast]         = useState('')
   const dropdownRef = useRef(null)
 
@@ -139,12 +142,20 @@ export default function POS() {
     if (!customer.name)   return showToast('Enter customer name')
     if (!customer.number) return showToast('Enter phone number')
     if (!cart.length)     return showToast('Cart is empty')
-    const discPct = cartGross > 0 ? Math.round(totalDiscount / cartGross * 100 * 10) / 10 : 0
+    if (paymentMethod === 'Split') {
+      const cash   = parseFloat(cashAmount) || 0
+      const online = parseFloat(onlineAmount) || 0
+      if (cash + online !== grandTotal) return showToast(`Split amounts must add up to ₹${grandTotal}`)
+    }
+    const discPct   = cartGross > 0 ? Math.round(totalDiscount / cartGross * 100 * 10) / 10 : 0
+    const cashAmt   = paymentMethod === 'Split' ? parseFloat(cashAmount) || 0 : paymentMethod === 'Cash' ? grandTotal : 0
+    const onlineAmt = paymentMethod === 'Split' ? parseFloat(onlineAmount) || 0 : paymentMethod === 'Online' ? grandTotal : 0
     const order = {
       id: String(Date.now()), customerName:customer.name, customerNumber:customer.number,
       customerAddress:customer.address, customerCity:customer.city, customerPincode:customer.pincode,
       tagNumber, serviceType, status:'pending', paymentMethod, paymentStatus,
       grandTotal, totalGarments, discountAmount:totalDiscount, discountPct:discPct,
+      cashAmount:cashAmt, onlineAmount:onlineAmt, rackLocation:rackLocation.trim(),
       cart:[...cart], orderDate:new Date().toISOString(), deliveryDate, deleted:false,
     }
     try {
@@ -156,7 +167,7 @@ export default function POS() {
       setTimeout(() => sendWhatsApp(order), 600)
       clearCart()
       setCustomer({ name:'', number:'', address:'', city:'', pincode:'' })
-      setOrderDiscount(0)
+      setOrderDiscount(0); setRackLocation(''); setCashAmount(''); setOnlineAmount('')
       setTagNumber(getNextTag([...orders, order]))
       setDeliveryDate(calcDeliveryDate())
       showToast('✅ Order saved! Printing tags & receipt…')
@@ -284,9 +295,10 @@ export default function POS() {
         <div className="form-two">
           <div>
             <label style={lbl}>Payment Method</label>
-            <select style={{ ...inp, cursor: 'pointer' }} value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)}>
+            <select style={{ ...inp, cursor: 'pointer' }} value={paymentMethod} onChange={e => { setPaymentMethod(e.target.value); setCashAmount(''); setOnlineAmount('') }}>
               <option>Cash</option>
               <option>Online</option>
+              <option>Split</option>
             </select>
           </div>
           <div>
@@ -297,6 +309,31 @@ export default function POS() {
               <option>Partial</option>
             </select>
           </div>
+        </div>
+
+        {/* Split payment inputs */}
+        {paymentMethod === 'Split' && (
+          <div style={{ background: 'rgba(13,148,136,0.05)', border: '1px solid rgba(13,148,136,0.2)', borderRadius: 10, padding: '12px 14px', marginTop: 4 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--indigo)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.5px' }}>💰 Split Payment — must total ₹{grandTotal || '—'}</div>
+            <div className="form-two">
+              <div>
+                <label style={lbl}>Cash Amount ₹</label>
+                <input type="number" style={inp} value={cashAmount} placeholder="0"
+                  onChange={e => { const v = parseFloat(e.target.value)||0; setCashAmount(e.target.value); setOnlineAmount(String(Math.max(0, grandTotal - v))) }} />
+              </div>
+              <div>
+                <label style={lbl}>Online Amount ₹</label>
+                <input type="number" style={inp} value={onlineAmount} placeholder="0"
+                  onChange={e => { const v = parseFloat(e.target.value)||0; setOnlineAmount(e.target.value); setCashAmount(String(Math.max(0, grandTotal - v))) }} />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Rack location */}
+        <div style={{ marginTop: 12 }}>
+          <label style={lbl}>📦 Rack / Shelf Location (optional)</label>
+          <input style={{ ...inp, maxWidth: 200 }} value={rackLocation} onChange={e => setRackLocation(e.target.value)} placeholder="e.g. A3, Shelf B2" />
         </div>
       </div>
 

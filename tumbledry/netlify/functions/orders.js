@@ -19,6 +19,8 @@ export async function handler(event) {
           payment_method, payment_status,
           grand_total::float, total_garments,
           discount_amount::float, discount_pct::float,
+          cash_amount::float, online_amount::float,
+          rack_location,
           cart, order_date, delivery_date, deleted
         FROM orders
         ORDER BY order_date DESC
@@ -39,6 +41,9 @@ export async function handler(event) {
         totalGarments:   r.total_garments,
         discountAmount:  r.discount_amount,
         discountPct:     r.discount_pct,
+        cashAmount:      r.cash_amount || 0,
+        onlineAmount:    r.online_amount || 0,
+        rackLocation:    r.rack_location || '',
         cart:            r.cart || [],
         orderDate:       r.order_date,
         deliveryDate:    r.delivery_date,
@@ -54,7 +59,7 @@ export async function handler(event) {
   if (event.httpMethod === 'POST') {
     const body = JSON.parse(event.body || '{}')
 
-    // ── Clear all orders (called once before batch import) ────
+    // ── Clear all orders ──────────────────────────────────────
     if (body.action === 'CLEAR_ALL') {
       try {
         await db`DELETE FROM orders`
@@ -64,14 +69,11 @@ export async function handler(event) {
       }
     }
 
-    // ── Batch insert (called multiple times with chunks) ──────
-    // Uses a single INSERT with multiple rows — much faster than loop
+    // ── Batch insert ──────────────────────────────────────────
     if (body.action === 'INSERT_BATCH') {
       const orders = body.orders || []
       if (orders.length === 0) return ok({ success: true, count: 0 })
       try {
-        // Build bulk insert using neon tagged template
-        // neon supports passing arrays directly
         for (const o of orders) {
           await db`
             INSERT INTO orders (
@@ -81,6 +83,7 @@ export async function handler(event) {
               payment_method, payment_status,
               grand_total, total_garments,
               discount_amount, discount_pct,
+              cash_amount, online_amount, rack_location,
               cart, order_date, delivery_date, deleted
             ) VALUES (
               ${o.id}, ${o.customerName||''}, ${o.customerNumber||''},
@@ -89,6 +92,7 @@ export async function handler(event) {
               ${o.paymentMethod||'Cash'}, ${o.paymentStatus||'Paid'},
               ${o.grandTotal||0}, ${o.totalGarments||0},
               ${o.discountAmount||0}, ${o.discountPct||0},
+              ${o.cashAmount||0}, ${o.onlineAmount||0}, ${o.rackLocation||''},
               ${JSON.stringify(o.cart||[])}, ${o.orderDate||new Date().toISOString()}, ${o.deliveryDate||''}, ${o.deleted||false}
             )
             ON CONFLICT (id) DO NOTHING
@@ -111,6 +115,7 @@ export async function handler(event) {
           payment_method, payment_status,
           grand_total, total_garments,
           discount_amount, discount_pct,
+          cash_amount, online_amount, rack_location,
           cart, order_date, delivery_date, deleted
         ) VALUES (
           ${o.id}, ${o.customerName}, ${o.customerNumber},
@@ -119,6 +124,7 @@ export async function handler(event) {
           ${o.paymentMethod||'Cash'}, ${o.paymentStatus||'Pending'},
           ${o.grandTotal||0}, ${o.totalGarments||0},
           ${o.discountAmount||0}, ${o.discountPct||0},
+          ${o.cashAmount||0}, ${o.onlineAmount||0}, ${o.rackLocation||''},
           ${JSON.stringify(o.cart||[])}, ${o.orderDate}, ${o.deliveryDate||''}, ${o.deleted||false}
         )
         ON CONFLICT (id) DO UPDATE SET
@@ -135,6 +141,9 @@ export async function handler(event) {
           total_garments   = EXCLUDED.total_garments,
           discount_amount  = EXCLUDED.discount_amount,
           discount_pct     = EXCLUDED.discount_pct,
+          cash_amount      = EXCLUDED.cash_amount,
+          online_amount    = EXCLUDED.online_amount,
+          rack_location    = EXCLUDED.rack_location,
           cart             = EXCLUDED.cart,
           delivery_date    = EXCLUDED.delivery_date,
           deleted          = EXCLUDED.deleted,

@@ -60,6 +60,13 @@ CREATE OR REPLACE TRIGGER orders_updated_at
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 -- ================================================================
+-- NEW COLUMNS (run these if upgrading an existing database)
+-- ================================================================
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS rack_location  TEXT DEFAULT '';
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS cash_amount    NUMERIC(10,2) DEFAULT 0;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS online_amount  NUMERIC(10,2) DEFAULT 0;
+
+-- ================================================================
 -- VERIFY setup
 -- ================================================================
 SELECT 'orders table' as table_name, COUNT(*) as rows FROM orders

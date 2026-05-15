@@ -57,6 +57,14 @@ export default function Dashboard() {
   async function updateStatus(order, newStatus) {
     await upsertOrder({ ...order, status: newStatus })
     showToast(`Status → ${newStatus}`)
+    if (newStatus === 'completed') {
+      setTimeout(() => sendReadyWhatsApp(order), 400)
+    }
+  }
+
+  function sendReadyWhatsApp(order) {
+    const msg = `Hello ${order.customerName}! 👋\n\nYour laundry is *ready for pickup* ✅\n\n🏷️ *Tag #:* ${order.tagNumber}\n👕 *Garments:* ${order.totalGarments}\n💰 *Amount:* ₹${order.grandTotal}\n\nPlease visit us to collect your order.\n\nThank you for choosing Tumbledry! 🙏`
+    window.open(`https://web.whatsapp.com/send?phone=91${order.customerNumber}&text=${encodeURIComponent(msg)}`, '_blank')
   }
 
   async function updatePayment(order, paymentStatus) {
@@ -213,8 +221,20 @@ export default function Dashboard() {
                     <div style={{ padding: '12px 16px 16px', borderTop: '1px solid var(--bd-subtle)', background: 'var(--bg-raised)', fontSize: 12, color: 'var(--tx-secondary)', lineHeight: 2 }}>
                       <div>📞 {order.customerNumber}{order.customerAddress ? ` · 📍 ${order.customerAddress}` : ''}</div>
                       <div>🧹 {order.serviceType} · 👕 {order.totalGarments} garments · 🚚 {order.deliveryDate}</div>
-                      <div>💳 {order.paymentMethod} — <span style={{ color: order.paymentStatus === 'Paid' ? 'var(--emerald)' : 'var(--rose)', fontWeight: 700 }}>{order.paymentStatus}</span></div>
+                      <div>
+                        💳 {order.paymentMethod} — <span style={{ color: order.paymentStatus === 'Paid' ? 'var(--emerald)' : 'var(--rose)', fontWeight: 700 }}>{order.paymentStatus}</span>
+                        {order.paymentMethod === 'Split' && (order.cashAmount > 0 || order.onlineAmount > 0) && (
+                          <span style={{ color: 'var(--tx-tertiary)', marginLeft: 6 }}>
+                            (💵 ₹{order.cashAmount} cash + 📲 ₹{order.onlineAmount} online)
+                          </span>
+                        )}
+                      </div>
                       {order.discountAmount > 0 && <div>🏷️ Discount: -₹{order.discountAmount} ({order.discountPct}%)</div>}
+                      {order.rackLocation && (
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, marginTop: 2, padding: '2px 10px', background: 'rgba(13,148,136,0.08)', border: '1px solid rgba(13,148,136,0.2)', borderRadius: 99, fontSize: 11, fontWeight: 700, color: 'var(--indigo)' }}>
+                          📦 Rack: {order.rackLocation}
+                        </div>
+                      )}
 
                       {order.cart && order.cart.length > 0 && (
                         <div style={{ margin: '8px 0', padding: '8px 10px', background: 'var(--bg-card)', borderRadius: 8, border: '1px solid var(--bd-subtle)' }}>

@@ -108,6 +108,7 @@ export function printTags(order) {
         orderDate:    new Date(order.orderDate).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'2-digit' }),
         num:          globalNum,
         total:        totalGarments,
+        rackLocation: order.rackLocation || '',
       })
     }
   })
@@ -130,6 +131,7 @@ export function printTags(order) {
       </div>
       <div class="delivery">${shortDate(t.delivery)}</div>
       <div class="item-name">${t.itemName}</div>
+      ${t.rackLocation ? `<div class="rack-loc">📦 ${t.rackLocation}</div>` : ''}
       <div class="order-date">${t.orderDate}</div>
     </div>
   `).join('')
@@ -260,6 +262,7 @@ export function printTagsInWindow(win, order) {
         orderDate:    new Date(order.orderDate).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'2-digit' }),
         num:          globalNum,
         total:        totalGarments,
+        rackLocation: order.rackLocation || '',
       })
     }
   })
@@ -281,6 +284,7 @@ export function printTagsInWindow(win, order) {
       </div>
       <div class="delivery">${shortDate(t.delivery)}</div>
       <div class="item-name">${t.itemName}</div>
+      ${t.rackLocation ? `<div class="rack-loc">📦 ${t.rackLocation}</div>` : ''}
       <div class="order-date">${t.orderDate}</div>
     </div>
   `).join('')
@@ -298,6 +302,7 @@ export function printTagsInWindow(win, order) {
       .piece-count { font-size:12px; font-weight:700; }
       .delivery { font-size:11px; font-weight:700; margin-bottom:1mm; }
       .item-name { font-size:10px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:1mm; }
+      .rack-loc { font-size:9px; font-weight:700; color:#0D9488; margin-bottom:0.5mm; }
       .order-date { font-size:8px; color:#555; text-align:right; border-top:1px dashed #ccc; padding-top:0.5mm; }
       @media print { @page { size:auto; margin:5mm; } }
     </style></head><body>${tagHTML}</body></html>`

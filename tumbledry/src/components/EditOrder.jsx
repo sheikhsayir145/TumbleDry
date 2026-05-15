@@ -19,6 +19,9 @@ export default function EditOrder({ order, onClose }) {
     status:          order.status          || 'pending',
     paymentMethod:   order.paymentMethod   || 'Cash',
     paymentStatus:   order.paymentStatus   || 'Pending',
+    rackLocation:    order.rackLocation    || '',
+    cashAmount:      order.cashAmount      || '',
+    onlineAmount:    order.onlineAmount    || '',
   })
   const [saving, setSaving] = useState(false)
   const [error,  setError]  = useState('')
@@ -101,7 +104,7 @@ export default function EditOrder({ order, onClose }) {
           <div>
             <label style={lbl}>Payment Method</label>
             <select style={{...inp, cursor:'pointer'}} value={form.paymentMethod} onChange={e=>set('paymentMethod',e.target.value)}>
-              <option>Cash</option><option>Online</option>
+              <option>Cash</option><option>Online</option><option>Split</option>
             </select>
           </div>
           <div>
@@ -110,6 +113,24 @@ export default function EditOrder({ order, onClose }) {
               <option>Paid</option><option>Pending</option><option>Partial</option>
             </select>
           </div>
+        </div>
+
+        {form.paymentMethod === 'Split' && (
+          <div className="form-two" style={{ padding:'10px 12px', background:'rgba(13,148,136,0.05)', borderRadius:9, border:'1px solid rgba(13,148,136,0.15)' }}>
+            <div>
+              <label style={lbl}>Cash Amount ₹</label>
+              <input style={inp} type="number" value={form.cashAmount} onChange={e=>{ set('cashAmount',e.target.value); set('onlineAmount', String(Math.max(0,(order.grandTotal||0)-(parseFloat(e.target.value)||0)))) }} />
+            </div>
+            <div>
+              <label style={lbl}>Online Amount ₹</label>
+              <input style={inp} type="number" value={form.onlineAmount} onChange={e=>{ set('onlineAmount',e.target.value); set('cashAmount', String(Math.max(0,(order.grandTotal||0)-(parseFloat(e.target.value)||0)))) }} />
+            </div>
+          </div>
+        )}
+
+        <div style={{marginTop:8}}>
+          <label style={lbl}>📦 Rack / Shelf Location</label>
+          <input style={{...inp, maxWidth:200}} value={form.rackLocation} onChange={e=>set('rackLocation',e.target.value)} placeholder="e.g. A3, Shelf B2" />
         </div>
 
         {/* Cart summary (read-only) */}
