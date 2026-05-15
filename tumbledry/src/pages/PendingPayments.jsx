@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useStore } from '../store/index.js'
 import { Card, Spinner, EmptyState, Modal } from '../components/ui/index.jsx'
+import { CreditCard, Clock, Phone, Truck, CheckCircle2, PartyPopper } from 'lucide-react'
 
 export default function PendingPayments() {
   const { orders, ordersLoading, upsertOrder } = useStore()
@@ -64,8 +65,8 @@ export default function PendingPayments() {
 
   return (
     <div className="page">
-      <h1 style={{ fontSize: 20, fontWeight: 800, marginBottom: 20, color: 'var(--tx-primary)', letterSpacing: '-0.4px' }}>
-        💳 Pending Payments
+      <h1 style={{ fontSize: 20, fontWeight: 800, marginBottom: 20, color: 'var(--tx-primary)', letterSpacing: '-0.4px', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <CreditCard size={20} strokeWidth={2} /> Pending Payments
       </h1>
 
       {/* Summary stats */}
@@ -84,7 +85,7 @@ export default function PendingPayments() {
 
       {/* Aging buckets */}
       <Card style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.7px', color: 'var(--tx-tertiary)', marginBottom: 14 }}>⏳ Payment Aging</div>
+        <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.7px', color: 'var(--tx-tertiary)', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 6 }}><Clock size={12} /> Payment Aging</div>
         <div className="aging-grid">
           {aging.map(b => (
             <div key={b.label} style={{ background: b.bg, borderLeft: `3px solid ${b.color}`, borderRadius: 9, padding: '12px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -128,7 +129,7 @@ export default function PendingPayments() {
         )}
 
         {filtered.length === 0 ? (
-          <EmptyState icon="🎉" title="No pending payments" subtitle={search ? `No results for "${search}"` : 'All payments collected!'} />
+          <EmptyState icon={<PartyPopper size={38} strokeWidth={1.5} />} title="No pending payments" subtitle={search ? `No results for "${search}"` : 'All payments collected!'} />
         ) : (
           filtered.map(order => {
             const badgeColor = order.paymentStatus === 'Pending' ? 'var(--rose)' : 'var(--amber)'
@@ -140,11 +141,11 @@ export default function PendingPayments() {
                     {highlight(order.customerName)}
                     <span className="mono" style={{ fontSize: 11, color: 'var(--indigo)', fontWeight: 600 }}>{highlight(order.tagNumber)}</span>
                   </div>
-                  <div style={{ fontSize: 11, color: 'var(--tx-secondary)', marginTop: 2 }}>
-                    📞 {highlight(order.customerNumber)} · {new Date(order.orderDate).toLocaleDateString('en-IN')} · {daysSince}d ago
+                  <div style={{ fontSize: 11, color: 'var(--tx-secondary)', marginTop: 2, display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
+                    <Phone size={10} style={{ opacity: 0.5 }} /> {highlight(order.customerNumber)} · {new Date(order.orderDate).toLocaleDateString('en-IN')} · {daysSince}d ago
                   </div>
-                  <div style={{ fontSize: 11, color: 'var(--tx-tertiary)' }}>
-                    🚚 {order.deliveryDate} · {order.serviceType}
+                  <div style={{ fontSize: 11, color: 'var(--tx-tertiary)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <Truck size={10} style={{ opacity: 0.5 }} /> {order.deliveryDate} · {order.serviceType}
                   </div>
                 </div>
 
@@ -161,8 +162,9 @@ export default function PendingPayments() {
                   color: 'white', border: 'none', borderRadius: 8, fontWeight: 700,
                   fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
                   boxShadow: '0 2px 8px rgba(16,185,129,0.2)', flexShrink: 0,
+                  display: 'flex', alignItems: 'center', gap: 5,
                 }}>
-                  ✅ Collect
+                  <CheckCircle2 size={13} strokeWidth={2.5} /> Collect
                 </button>
               </div>
             )
@@ -171,7 +173,7 @@ export default function PendingPayments() {
       </Card>
 
       {/* Confirm modal */}
-      <Modal open={!!confirmOrder} onClose={() => setConfirmOrder(null)} title="💳 Collect Payment" maxWidth={400}>
+      <Modal open={!!confirmOrder} onClose={() => setConfirmOrder(null)} title="Collect Payment" maxWidth={400}>
         {confirmOrder && (
           <div>
             <div style={{ background: 'var(--bg-raised)', borderRadius: 10, padding: '16px 18px', marginBottom: 18 }}>
@@ -184,8 +186,8 @@ export default function PendingPayments() {
               <button onClick={() => setConfirmOrder(null)} style={{ flex: 1, padding: 12, background: 'var(--bg-raised)', border: '1px solid var(--bd-subtle)', borderRadius: 9, fontFamily: 'inherit', fontWeight: 600, cursor: 'pointer', color: 'var(--tx-secondary)', fontSize: 13 }}>
                 Cancel
               </button>
-              <button onClick={() => collectPayment(confirmOrder)} style={{ flex: 2, padding: 12, background: 'linear-gradient(135deg,#059669,#10B981)', color: 'white', border: 'none', borderRadius: 9, fontFamily: 'inherit', fontWeight: 700, cursor: 'pointer', fontSize: 14 }}>
-                ✅ Yes, Collect
+              <button onClick={() => collectPayment(confirmOrder)} style={{ flex: 2, padding: 12, background: 'linear-gradient(135deg,#059669,#10B981)', color: 'white', border: 'none', borderRadius: 9, fontFamily: 'inherit', fontWeight: 700, cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                <CheckCircle2 size={15} strokeWidth={2.5} /> Yes, Collect
               </button>
             </div>
           </div>

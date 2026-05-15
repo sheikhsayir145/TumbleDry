@@ -7,6 +7,7 @@ import {
   SERVICE_KG_RATES, isKgService, getNextTag, calcDeliveryDate
 } from '../lib/garments.js'
 import { printTagsInWindow, printReceiptInWindow } from '../lib/print.js'
+import { User, ShoppingCart, Package, Scale, Shirt, Tag, DollarSign } from 'lucide-react'
 
 function getActiveRates() {
   try {
@@ -212,7 +213,7 @@ export default function POS() {
 
       {/* ── Customer card ── */}
       <div style={cardStyle}>
-        <div style={sectionHead}>👤 Customer</div>
+        <div style={{ ...sectionHead, display: 'flex', alignItems: 'center', gap: 6 }}><User size={12} strokeWidth={2.5} /> Customer</div>
 
         {/* Name with autocomplete */}
         <div style={{ position: 'relative', marginBottom: 12 }}>
@@ -314,7 +315,7 @@ export default function POS() {
         {/* Split payment inputs */}
         {paymentMethod === 'Split' && (
           <div style={{ background: 'rgba(13,148,136,0.05)', border: '1px solid rgba(13,148,136,0.2)', borderRadius: 10, padding: '12px 14px', marginTop: 4 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--indigo)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.5px' }}>💰 Split Payment — must total ₹{grandTotal || '—'}</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--indigo)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: 5 }}><DollarSign size={11} /> Split Payment — must total ₹{grandTotal || '—'}</div>
             <div className="form-two">
               <div>
                 <label style={lbl}>Cash Amount ₹</label>
@@ -332,14 +333,14 @@ export default function POS() {
 
         {/* Rack location */}
         <div style={{ marginTop: 12 }}>
-          <label style={lbl}>📦 Rack / Shelf Location (optional)</label>
+          <label style={{ ...lbl, display: 'flex', alignItems: 'center', gap: 5 }}><Package size={11} /> Rack / Shelf Location (optional)</label>
           <input style={{ ...inp, maxWidth: 200 }} value={rackLocation} onChange={e => setRackLocation(e.target.value)} placeholder="e.g. A3, Shelf B2" />
         </div>
       </div>
 
       {/* ── Cart card ── */}
       <div style={cardStyle}>
-        <div style={sectionHead}>🛒 Cart & Billing</div>
+        <div style={{ ...sectionHead, display: 'flex', alignItems: 'center', gap: 6 }}><ShoppingCart size={12} strokeWidth={2.5} /> Cart & Billing</div>
 
         {/* Billing mode toggle */}
         <div style={{ display: 'flex', gap: 6, marginBottom: 16, background: 'var(--bg-raised)', padding: 4, borderRadius: 10, width: 'fit-content', border: '1px solid var(--bd-subtle)' }}>
@@ -352,7 +353,9 @@ export default function POS() {
               boxShadow: billingMode === m ? 'var(--shadow-sm)' : 'none',
               transition: 'all 0.15s',
             }}>
-              {m === 'piece' ? '👕 Piece' : '⚖️ KG'}
+              {m === 'piece'
+                ? <><Shirt size={13} strokeWidth={2} /> Piece</>
+                : <><Scale size={13} strokeWidth={2} /> KG</>}
             </button>
           ))}
         </div>
@@ -474,7 +477,7 @@ export default function POS() {
 
             {/* Order discount */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'var(--bg-raised)', borderRadius: 9, marginBottom: 12, border: '1px solid var(--bd-subtle)', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx-secondary)', flexShrink: 0 }}>🏷️ Order Discount (%)</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--tx-secondary)', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 5 }}><Tag size={13} strokeWidth={2} /> Order Discount (%)</span>
               <input
                 type="number" min="0" max="100"
                 value={orderDiscount}
@@ -511,7 +514,7 @@ export default function POS() {
               color: 'white', boxShadow: 'var(--shadow-teal)',
               letterSpacing: '0.1px',
             }}>
-              ✅ Process Order & Send WhatsApp
+              Process Order & Send WhatsApp
             </button>
           </>
         )}

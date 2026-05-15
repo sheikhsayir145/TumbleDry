@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useStore } from '../store/index.js'
 import { Card, Spinner } from '../components/ui/index.jsx'
+import { BarChart2, DollarSign, Lightbulb, Clock, Calendar, TrendingUp, Scissors, Tag, Trophy, AlertCircle, Moon } from 'lucide-react'
 import {
   Chart as ChartJS,
   CategoryScale, LinearScale, BarElement, LineElement,
@@ -132,18 +133,18 @@ export default function Analytics() {
   const heatMax = Math.max(1, ...heatmap.flat())
 
   const TABS = [
-    { id: 'performance', label: '📊 Performance' },
-    { id: 'revenue',     label: '💰 Revenue'     },
-    { id: 'insights',    label: '🔍 Insights'    },
-    { id: 'heatmap',     label: '🕐 Peak Hours'  },
+    { id: 'performance', label: 'Performance', icon: BarChart2   },
+    { id: 'revenue',     label: 'Revenue',     icon: DollarSign  },
+    { id: 'insights',    label: 'Insights',    icon: Lightbulb   },
+    { id: 'heatmap',     label: 'Peak Hours',  icon: Clock       },
   ]
 
   if (ordersLoading) return <div style={{ display:'flex', justifyContent:'center', padding:80 }}><Spinner size={40} /></div>
 
   return (
     <div className="page">
-      <h1 style={{ fontSize:20, fontWeight:800, marginBottom:20, color:'var(--tx-primary)', letterSpacing:'-0.4px' }}>
-        📊 Analytics
+      <h1 style={{ fontSize:20, fontWeight:800, marginBottom:20, color:'var(--tx-primary)', letterSpacing:'-0.4px', display:'flex', alignItems:'center', gap:10 }}>
+        <BarChart2 size={20} strokeWidth={2} /> Analytics
       </h1>
 
       {/* Tab switcher */}
@@ -156,8 +157,9 @@ export default function Analytics() {
             color: tab === t.id ? 'var(--tx-primary)' : 'var(--tx-secondary)',
             boxShadow: tab === t.id ? 'var(--shadow-sm)' : 'none',
             transition: 'background 0.15s, color 0.15s',
+            display:'flex', alignItems:'center', gap:5,
           }}>
-            {t.label}
+            <t.icon size={13} strokeWidth={2} />{t.label}
           </button>
         ))}
       </div>
@@ -181,7 +183,7 @@ export default function Analytics() {
 
           <div className="chart-grid">
             <Card>
-              <div style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.6px', color:'var(--tx-tertiary)', marginBottom:14 }}>📅 Daily Orders — Last 7 Days</div>
+              <div style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.6px', color:'var(--tx-tertiary)', marginBottom:14, display:'flex', alignItems:'center', gap:5 }}><Calendar size={12} /> Daily Orders — Last 7 Days</div>
               <div style={{ height:200 }}>
                 <Bar
                   data={{ labels: last7.map(d => d.slice(5)), datasets: [{ data: dailyOrd, backgroundColor: TEAL_RGBA(0.7), hoverBackgroundColor: TEAL_RGBA(0.9), borderRadius: 5 }] }}
@@ -190,7 +192,7 @@ export default function Analytics() {
               </div>
             </Card>
             <Card>
-              <div style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.6px', color:'var(--tx-tertiary)', marginBottom:14 }}>💰 Daily Revenue — Last 7 Days</div>
+              <div style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.6px', color:'var(--tx-tertiary)', marginBottom:14, display:'flex', alignItems:'center', gap:5 }}><DollarSign size={12} /> Daily Revenue — Last 7 Days</div>
               <div style={{ height:200 }}>
                 <Line
                   data={{ labels: last7.map(d => d.slice(5)), datasets: [{ data: dailyRev, borderColor: TEAL, backgroundColor: TEAL_RGBA(0.08), tension:0.4, fill:true, pointBackgroundColor: TEAL, pointRadius:4 }] }}
@@ -206,7 +208,7 @@ export default function Analytics() {
       {tab === 'revenue' && (
         <div className="chart-grid">
           <Card>
-            <div style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.6px', color:'var(--tx-tertiary)', marginBottom:14 }}>📈 Revenue Growth — 6 Months</div>
+            <div style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.6px', color:'var(--tx-tertiary)', marginBottom:14, display:'flex', alignItems:'center', gap:5 }}><TrendingUp size={12} /> Revenue Growth — 6 Months</div>
             <div style={{ height:240 }}>
               <Line
                 data={{ labels: buckets.map(b => b.label), datasets: [{ data: buckets.map(b => b.revenue), borderColor: TEAL, backgroundColor: TEAL_RGBA(0.07), tension:0.4, fill:true, pointBackgroundColor: TEAL, pointRadius:5 }] }}
@@ -215,7 +217,7 @@ export default function Analytics() {
             </div>
           </Card>
           <Card>
-            <div style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.6px', color:'var(--tx-tertiary)', marginBottom:14 }}>🧹 Revenue by Service Type</div>
+            <div style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.6px', color:'var(--tx-tertiary)', marginBottom:14, display:'flex', alignItems:'center', gap:5 }}><Scissors size={12} /> Revenue by Service Type</div>
             <div style={{ height:240 }}>
               <Doughnut
                 data={{ labels: svcLabels, datasets: [{ data: svcVals, backgroundColor: [TEAL,'#F59E0B','#10B981','#F43F5E','#0EA5E9'], borderWidth:0 }] }}
@@ -229,7 +231,7 @@ export default function Analytics() {
       {/* ── Heatmap Tab ── */}
       {tab === 'heatmap' && (
         <Card>
-          <div style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.6px', color:'var(--tx-tertiary)', marginBottom:6 }}>🕐 Orders by Day & Time</div>
+          <div style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.6px', color:'var(--tx-tertiary)', marginBottom:6, display:'flex', alignItems:'center', gap:5 }}><Clock size={12} /> Orders by Day & Time</div>
           <div style={{ fontSize:12, color:'var(--tx-secondary)', marginBottom:18 }}>Darker = more orders at that time</div>
           <div style={{ overflowX:'auto' }}>
             <table style={{ borderCollapse:'separate', borderSpacing:4, minWidth:420 }}>
@@ -289,7 +291,7 @@ export default function Analytics() {
             const avgDiscount    = discountOrders.length > 0 ? Math.round(totalDiscount/discountOrders.length) : 0
             return (
               <Card>
-                <div style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.6px', color:'var(--tx-tertiary)', marginBottom:14 }}>🏷️ Discount Impact Report</div>
+                <div style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.6px', color:'var(--tx-tertiary)', marginBottom:14, display:'flex', alignItems:'center', gap:5 }}><Tag size={12} /> Discount Impact Report</div>
                 <div className="discount-grid" style={{ marginBottom:14 }}>
                   {[
                     { label:'Orders with Discount',   value:discountOrders.length,                              color:'var(--amber)'  },
@@ -304,8 +306,8 @@ export default function Analytics() {
                   ))}
                 </div>
                 {discountOrders.length > 0 && (
-                  <div style={{ fontSize:13, color:'var(--tx-secondary)', padding:'10px 14px', background:AMBER_RGBA(0.06), borderRadius:8, border:'1px solid rgba(245,158,11,0.15)', lineHeight:1.6 }}>
-                    💡 Discounts on <strong style={{color:'var(--tx-primary)'}}>{((discountOrders.length/active.length)*100).toFixed(1)}%</strong> of orders · total reduction <strong className="mono" style={{color:'var(--rose)'}}>₹{Math.round(totalDiscount).toLocaleString()}</strong> · gross before discounts <strong className="mono" style={{color:'var(--tx-primary)'}}>₹{Math.round(totalGross).toLocaleString()}</strong>
+                  <div style={{ fontSize:13, color:'var(--tx-secondary)', padding:'10px 14px', background:AMBER_RGBA(0.06), borderRadius:8, border:'1px solid rgba(245,158,11,0.15)', lineHeight:1.6, display:'flex', alignItems:'flex-start', gap:6 }}>
+                    <Lightbulb size={13} style={{flexShrink:0, opacity:0.7}} /> Discounts on <strong style={{color:'var(--tx-primary)'}}>{((discountOrders.length/active.length)*100).toFixed(1)}%</strong> of orders · total reduction <strong className="mono" style={{color:'var(--rose)'}}>₹{Math.round(totalDiscount).toLocaleString()}</strong> · gross before discounts <strong className="mono" style={{color:'var(--tx-primary)'}}>₹{Math.round(totalGross).toLocaleString()}</strong>
                   </div>
                 )}
               </Card>
@@ -315,13 +317,13 @@ export default function Analytics() {
           <div className="chart-grid">
             {/* Top Customers */}
             <Card>
-              <div style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.6px', color:'var(--tx-tertiary)', marginBottom:14 }}>🏆 Top 10 Customers by Spend</div>
+              <div style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.6px', color:'var(--tx-tertiary)', marginBottom:14, display:'flex', alignItems:'center', gap:5 }}><Trophy size={12} /> Top 10 Customers by Spend</div>
               {topCustomers.length === 0 ? (
                 <div style={{ fontSize:13, color:'var(--tx-secondary)', padding:'20px 0', textAlign:'center' }}>No data yet</div>
               ) : topCustomers.map((c, i) => (
                 <div key={c.phone} style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 0', borderBottom:'1px solid var(--bd-subtle)' }}>
-                  <div style={{ fontSize:i < 3 ? 18 : 13, width:28, textAlign:'center', fontWeight:800, color:i===0?'#F59E0B':i===1?'#94a3b8':i===2?'#b45309':'var(--tx-tertiary)', flexShrink:0 }}>
-                    {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i+1}
+                  <div style={{ width:28, textAlign:'center', fontWeight:800, flexShrink:0, fontSize:i < 3 ? 14 : 13, color:i===0?'#F59E0B':i===1?'#94a3b8':i===2?'#b45309':'var(--tx-tertiary)' }}>
+                    {i+1}
                   </div>
                   <div style={{ flex:1, minWidth:0 }}>
                     <div style={{ fontSize:13, fontWeight:700, color:'var(--tx-primary)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{c.name}</div>
@@ -337,7 +339,7 @@ export default function Analytics() {
 
             {/* Payment Aging + Lapsed */}
             <Card>
-              <div style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.6px', color:'var(--tx-tertiary)', marginBottom:10 }}>⏳ Outstanding Payment Aging</div>
+              <div style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.6px', color:'var(--tx-tertiary)', marginBottom:10, display:'flex', alignItems:'center', gap:5 }}><Clock size={12} /> Outstanding Payment Aging</div>
               <div style={{ fontSize:13, color:'var(--tx-secondary)', marginBottom:12 }}>
                 Total: <strong className="mono" style={{color:'var(--rose)'}}>₹{pending.reduce((s,o) => s+o.grandTotal, 0).toLocaleString()}</strong> across {pending.length} orders
               </div>
@@ -351,9 +353,9 @@ export default function Analytics() {
                 </div>
               ))}
 
-              <div style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.6px', color:'var(--tx-tertiary)', margin:'20px 0 12px' }}>😴 Lapsed Customers (60+ days)</div>
+              <div style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.6px', color:'var(--tx-tertiary)', margin:'20px 0 12px', display:'flex', alignItems:'center', gap:5 }}><Moon size={12} /> Lapsed Customers (60+ days)</div>
               {lapsed.length === 0 ? (
-                <div style={{ fontSize:13, color:'var(--tx-secondary)', padding:'8px 0' }}>🎉 No lapsed customers!</div>
+                <div style={{ fontSize:13, color:'var(--tx-secondary)', padding:'8px 0' }}>No lapsed customers</div>
               ) : lapsed.map(c => (
                 <div key={c.phone} style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 10px', borderRadius:7, marginBottom:6, background:'var(--bg-raised)' }}>
                   <div style={{ flex:1, minWidth:0 }}>

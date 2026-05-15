@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useStore } from '../store/index.js'
 import { Card, Spinner, EmptyState, Modal } from '../components/ui/index.jsx'
+import { Users, MapPin, AlertTriangle, MousePointerClick } from 'lucide-react'
 
 const STATUS_COLORS = {
   pending:   { bg: 'rgba(245,158,11,0.12)',  color: '#D97706' },
@@ -51,8 +52,8 @@ export default function CustomerProfiles() {
 
   return (
     <div className="page">
-      <h1 style={{ fontSize: 20, fontWeight: 800, marginBottom: 4, color: 'var(--tx-primary)', letterSpacing: '-0.4px' }}>
-        👥 Customer Profiles
+      <h1 style={{ fontSize: 20, fontWeight: 800, marginBottom: 4, color: 'var(--tx-primary)', letterSpacing: '-0.4px', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <Users size={20} strokeWidth={2} /> Customer Profiles
       </h1>
       <p style={{ fontSize: 13, color: 'var(--tx-secondary)', marginBottom: 20 }}>{customers.length} unique customers</p>
 
@@ -68,7 +69,7 @@ export default function CustomerProfiles() {
           </div>
           <div style={{ maxHeight: 560, overflowY: 'auto' }}>
             {filtered.length === 0 ? (
-              <EmptyState icon="👥" title="No customers found" />
+              <EmptyState icon={<Users size={38} strokeWidth={1.5} />} title="No customers found" />
             ) : filtered.map(c => {
               const pending    = c.orders.filter(o => o.paymentStatus === 'Pending' || o.paymentStatus === 'Partial')
               const isSelected = selectedPhone === c.phone
@@ -108,7 +109,7 @@ export default function CustomerProfiles() {
         <div className="hide-mobile">
           {selected ? <CustomerDetail selected={selected} /> : (
             <Card>
-              <EmptyState icon="👆" title="Select a customer" subtitle="Click any customer from the list to view their profile and order history" />
+              <EmptyState icon={<MousePointerClick size={38} strokeWidth={1.5} />} title="Select a customer" subtitle="Click any customer from the list to view their profile and order history" />
             </Card>
           )}
         </div>
@@ -137,8 +138,8 @@ function CustomerDetail({ selected }) {
             <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--tx-primary)', letterSpacing: '-0.3px' }}>{selected.name}</div>
             <div style={{ fontSize: 13, color: 'var(--tx-secondary)' }}>{selected.phone}</div>
             {selected.address && (
-              <div style={{ fontSize: 12, color: 'var(--tx-tertiary)', marginTop: 2 }}>
-                📍 {[selected.address, selected.city].filter(Boolean).join(', ')}
+              <div style={{ fontSize: 12, color: 'var(--tx-tertiary)', marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}>
+                <MapPin size={11} style={{ opacity: 0.5 }} /> {[selected.address, selected.city].filter(Boolean).join(', ')}
               </div>
             )}
           </div>
@@ -159,8 +160,8 @@ function CustomerDetail({ selected }) {
         </div>
 
         {pending.length > 0 && (
-          <div style={{ marginTop: 14, padding: '11px 13px', background: 'rgba(244,63,94,0.06)', border: '1px solid rgba(244,63,94,0.15)', borderRadius: 9, fontSize: 13, color: 'var(--rose)' }}>
-            ⚠️ {pending.length} pending payment(s) totalling
+          <div style={{ marginTop: 14, padding: '11px 13px', background: 'rgba(244,63,94,0.06)', border: '1px solid rgba(244,63,94,0.15)', borderRadius: 9, fontSize: 13, color: 'var(--rose)', display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+            <AlertTriangle size={13} strokeWidth={2} /> {pending.length} pending payment(s) totalling
             <strong className="mono" style={{ marginLeft: 4 }}>
               ₹{pending.reduce((s, o) => s + o.grandTotal, 0).toLocaleString()}
             </strong>

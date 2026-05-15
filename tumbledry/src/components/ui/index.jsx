@@ -241,7 +241,7 @@ export function Spinner({ size = 20 }) {
 export function EmptyState({ icon, title, subtitle }) {
   return (
     <div style={{ textAlign: 'center', padding: '36px 20px', color: 'var(--tx-secondary)' }}>
-      <div style={{ fontSize: 38, marginBottom: 12 }}>{icon}</div>
+      <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'center', color: 'var(--tx-tertiary)', opacity: 0.7 }}>{icon}</div>
       <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--tx-primary)', marginBottom: 5 }}>{title}</div>
       {subtitle && <div style={{ fontSize: 13, color: 'var(--tx-secondary)', maxWidth: 280, margin: '0 auto', lineHeight: 1.5 }}>{subtitle}</div>}
     </div>

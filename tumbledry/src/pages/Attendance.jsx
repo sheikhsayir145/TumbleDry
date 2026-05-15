@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useStore } from '../store/index.js'
 import { Card, Spinner } from '../components/ui/index.jsx'
 import { EMPLOYEES, ATT_STATUSES } from '../lib/garments.js'
+import { HardHat, Calendar } from 'lucide-react'
 
 const ATT_COLORS = {
   Working:    { bg: 'rgba(16,185,129,0.12)',  color: '#059669', border: 'rgba(16,185,129,0.25)'  },
@@ -50,8 +51,8 @@ export default function Attendance() {
 
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
-        <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--tx-primary)', letterSpacing: '-0.4px' }}>
-          👷 Staff Attendance
+        <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--tx-primary)', letterSpacing: '-0.4px', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <HardHat size={20} strokeWidth={2} /> Staff Attendance
         </h1>
         <input
           type="date" value={date}
@@ -128,8 +129,8 @@ export default function Attendance() {
       {/* History table */}
       <Card style={{ padding: 0, overflow: 'hidden' }}>
         <div style={{ padding: '12px 18px', borderBottom: '1px solid var(--bd-subtle)' }}>
-          <span style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.7px', color: 'var(--tx-tertiary)' }}>
-            📅 Last 7 Days
+          <span style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.7px', color: 'var(--tx-tertiary)', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Calendar size={12} /> Last 7 Days
           </span>
         </div>
         <div style={{ overflowX: 'auto' }}>
@@ -173,7 +174,7 @@ export default function Attendance() {
 
       {toast && (
         <div style={{ position: 'fixed', bottom: 80, right: 16, background: 'var(--bg-card)', border: '1px solid var(--bd-subtle)', borderLeft: '3px solid var(--emerald)', borderRadius: 10, padding: '10px 16px', boxShadow: 'var(--shadow-lg)', fontSize: 13, fontWeight: 600, zIndex: 9999, color: 'var(--tx-primary)', animation: 'fadeUp 0.25s var(--ease-out)' }}>
-          💾 {toast}
+          {toast}
         </div>
       )}
     </div>

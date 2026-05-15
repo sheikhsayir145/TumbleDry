@@ -44,18 +44,18 @@ export default function EditOrder({ order, onClose }) {
   }
 
   const STATUS_OPTIONS = [
-    { value:'pending',   label:'📥 Received'   },
-    { value:'inprocess', label:'⚙️ In Process' },
-    { value:'completed', label:'✅ Ready'       },
-    { value:'delivered', label:'🚚 Delivered'   },
+    { value:'pending',   label:'Received'   },
+    { value:'inprocess', label:'In Process' },
+    { value:'completed', label:'Ready'       },
+    { value:'delivered', label:'Delivered'   },
   ]
 
   return (
-    <Modal open={true} onClose={onClose} title={`✏️ Edit — ${order.tagNumber}`} maxWidth={580}>
+    <Modal open={true} onClose={onClose} title={`Edit — ${order.tagNumber}`} maxWidth={580}>
       <div style={{ display:'grid', gap:12 }}>
 
         {/* Customer section */}
-        <div style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.6px', color:'var(--tx-tertiary)', marginBottom:2 }}>👤 Customer</div>
+        <div style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.6px', color:'var(--tx-tertiary)', marginBottom:2 }}>Customer</div>
         <div className="form-two">
           <div><label style={lbl}>Name</label><input style={inp} value={form.customerName} onChange={e=>set('customerName',e.target.value)} /></div>
           <div><label style={lbl}>Phone</label><input style={inp} value={form.customerNumber} onChange={e=>set('customerNumber',e.target.value)} /></div>
@@ -64,7 +64,7 @@ export default function EditOrder({ order, onClose }) {
         </div>
 
         {/* Order section */}
-        <div style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.6px', color:'var(--tx-tertiary)', marginTop:6, marginBottom:2 }}>📦 Order Details</div>
+        <div style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.6px', color:'var(--tx-tertiary)', marginTop:6, marginBottom:2 }}>Order Details</div>
         <div className="form-three">
           <div><label style={lbl}>Tag #</label><input style={inp} value={form.tagNumber} onChange={e=>set('tagNumber',e.target.value)} /></div>
           <div><label style={lbl}>Delivery Date</label><input style={inp} value={form.deliveryDate} onChange={e=>set('deliveryDate',e.target.value)} /></div>
@@ -77,7 +77,7 @@ export default function EditOrder({ order, onClose }) {
         </div>
 
         {/* Status & Payment */}
-        <div style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.6px', color:'var(--tx-tertiary)', marginTop:6, marginBottom:2 }}>📋 Status & Payment</div>
+        <div style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.6px', color:'var(--tx-tertiary)', marginTop:6, marginBottom:2 }}>Status & Payment</div>
 
         <div>
           <label style={lbl}>Order Status</label>
@@ -129,14 +129,14 @@ export default function EditOrder({ order, onClose }) {
         )}
 
         <div style={{marginTop:8}}>
-          <label style={lbl}>📦 Rack / Shelf Location</label>
+          <label style={lbl}>Rack / Shelf Location</label>
           <input style={{...inp, maxWidth:200}} value={form.rackLocation} onChange={e=>set('rackLocation',e.target.value)} placeholder="e.g. A3, Shelf B2" />
         </div>
 
         {/* Cart summary (read-only) */}
         {order.cart && order.cart.length > 0 && (
           <div style={{ background:'var(--bg-raised)', borderRadius:9, padding:'12px 14px', border:'1px solid var(--bd-subtle)', marginTop:4 }}>
-            <div style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.5px', color:'var(--tx-tertiary)', marginBottom:8 }}>🛒 Items (read-only)</div>
+            <div style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.5px', color:'var(--tx-tertiary)', marginBottom:8 }}>Items (read-only)</div>
             {order.cart.map((item,i) => (
               <div key={i} style={{ display:'flex', justifyContent:'space-between', fontSize:12, color:'var(--tx-secondary)', padding:'4px 0', borderBottom:'1px dashed var(--bd-subtle)' }}>
                 <span>{item.qty}x {item.name}</span>

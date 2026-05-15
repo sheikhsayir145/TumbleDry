@@ -5,13 +5,20 @@ import { useStore } from '../store/index.js'
 import { Card, Spinner, EmptyState, Modal } from '../components/ui/index.jsx'
 import EditOrder from '../components/EditOrder.jsx'
 import { printReceipt, printTags } from '../lib/print.js'
+import {
+  Inbox, Settings2, CheckCircle2, Truck,
+  Phone, MapPin, Shirt, CreditCard, Tag, Package,
+  Pencil, Printer, ChevronUp, ChevronDown,
+  Check, Clock, AlertCircle, ClipboardList,
+  Banknote, Smartphone,
+} from 'lucide-react'
 
 const STATUS_ORDER = ['pending', 'inprocess', 'completed', 'delivered']
 const TIMELINE = [
-  { key: 'pending',   label: 'Received',   icon: '📥' },
-  { key: 'inprocess', label: 'In Process', icon: '⚙️' },
-  { key: 'completed', label: 'Ready',      icon: '✅' },
-  { key: 'delivered', label: 'Delivered',  icon: '🚚' },
+  { key: 'pending',   label: 'Received',   icon: Inbox          },
+  { key: 'inprocess', label: 'In Process', icon: Settings2       },
+  { key: 'completed', label: 'Ready',      icon: CheckCircle2    },
+  { key: 'delivered', label: 'Delivered',  icon: Truck           },
 ]
 
 const STATUS_COLORS = {
@@ -135,7 +142,7 @@ export default function Dashboard() {
           <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--tx-primary)', marginRight: 'auto' }}>Recent Orders</span>
           <input
             value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="🔍 Name, phone or tag…"
+            placeholder="Search name, phone or tag…"
             style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid var(--bd-subtle)', fontSize: 13, background: 'var(--bg-input)', color: 'var(--tx-primary)', fontFamily: 'inherit', width: 200, outline: 'none' }}
           />
           <select
@@ -143,15 +150,15 @@ export default function Dashboard() {
             style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid var(--bd-subtle)', fontSize: 13, background: 'var(--bg-input)', color: 'var(--tx-primary)', fontFamily: 'inherit', cursor: 'pointer', outline: 'none' }}
           >
             <option value="">All Status</option>
-            <option value="pending">📥 Received</option>
-            <option value="inprocess">⚙️ In Process</option>
-            <option value="completed">✅ Ready</option>
-            <option value="delivered">🚚 Delivered</option>
+            <option value="pending">Received</option>
+            <option value="inprocess">In Process</option>
+            <option value="completed">Ready</option>
+            <option value="delivered">Delivered</option>
           </select>
         </div>
 
         {filtered.length === 0 ? (
-          <EmptyState icon="📋" title="No orders found" subtitle="Try adjusting your search or filters" />
+          <EmptyState icon={<ClipboardList size={38} strokeWidth={1.5} />} title="No orders found" subtitle="Try adjusting your search or filters" />
         ) : (
           <div>
             {filtered.slice(0, 100).map(order => {
@@ -179,7 +186,9 @@ export default function Dashboard() {
                     <div className="mono" style={{ fontSize: 15, fontWeight: 800, color: 'var(--tx-primary)', flexShrink: 0 }}>
                       ₹{order.grandTotal?.toLocaleString()}
                     </div>
-                    <div style={{ color: 'var(--tx-tertiary)', fontSize: 12, flexShrink: 0 }}>{isExpanded ? '▲' : '▼'}</div>
+                    <div style={{ color: 'var(--tx-tertiary)', flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+                      {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                    </div>
                   </div>
 
                   {/* Timeline */}
@@ -188,20 +197,21 @@ export default function Dashboard() {
                       {TIMELINE.map((step, i) => {
                         const isDone   = i < curIdx
                         const isActive = i === curIdx
+                        const Icon     = step.icon
                         return (
                           <div key={step.key} style={{ display: 'flex', flex: 1, alignItems: 'center', position: 'relative' }}>
                             <div onClick={e => { e.stopPropagation(); updateStatus(order, step.key) }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', flex: 1 }}>
                               <div style={{
                                 width: 26, height: 26, borderRadius: '50%',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                fontSize: 11, zIndex: 1, position: 'relative',
+                                zIndex: 1, position: 'relative',
                                 background: isDone ? 'var(--emerald)' : isActive ? 'var(--indigo)' : 'var(--bg-raised)',
                                 border: `2px solid ${isDone ? 'var(--emerald)' : isActive ? 'var(--indigo)' : 'var(--bd-default)'}`,
                                 color: (isDone || isActive) ? 'white' : 'var(--tx-tertiary)',
                                 boxShadow: isActive ? '0 0 0 4px rgba(13,148,136,0.15)' : 'none',
                                 transition: 'all 0.25s',
                               }}>
-                                {step.icon}
+                                <Icon size={12} strokeWidth={2.5} />
                               </div>
                               <div style={{ fontSize: 9, fontWeight: 700, color: (isDone || isActive) ? 'var(--tx-primary)' : 'var(--tx-tertiary)', marginTop: 3, textTransform: 'uppercase', letterSpacing: '0.3px' }}>
                                 {step.label}
@@ -219,20 +229,42 @@ export default function Dashboard() {
                   {/* Expanded detail */}
                   {isExpanded && (
                     <div style={{ padding: '12px 16px 16px', borderTop: '1px solid var(--bd-subtle)', background: 'var(--bg-raised)', fontSize: 12, color: 'var(--tx-secondary)', lineHeight: 2 }}>
-                      <div>📞 {order.customerNumber}{order.customerAddress ? ` · 📍 ${order.customerAddress}` : ''}</div>
-                      <div>🧹 {order.serviceType} · 👕 {order.totalGarments} garments · 🚚 {order.deliveryDate}</div>
-                      <div>
-                        💳 {order.paymentMethod} — <span style={{ color: order.paymentStatus === 'Paid' ? 'var(--emerald)' : 'var(--rose)', fontWeight: 700 }}>{order.paymentStatus}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
+                        <Phone size={11} style={{ opacity: 0.5, flexShrink: 0 }} />
+                        {order.customerNumber}
+                        {order.customerAddress && (
+                          <><span style={{ opacity: 0.4 }}>·</span><MapPin size={11} style={{ opacity: 0.5, flexShrink: 0 }} />{order.customerAddress}</>
+                        )}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
+                        <Shirt size={11} style={{ opacity: 0.5, flexShrink: 0 }} />
+                        {order.serviceType}
+                        <span style={{ opacity: 0.4 }}>·</span>
+                        {order.totalGarments} garments
+                        <span style={{ opacity: 0.4 }}>·</span>
+                        <Truck size={11} style={{ opacity: 0.5, flexShrink: 0 }} />
+                        {order.deliveryDate}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
+                        <CreditCard size={11} style={{ opacity: 0.5, flexShrink: 0 }} />
+                        {order.paymentMethod} —{' '}
+                        <span style={{ color: order.paymentStatus === 'Paid' ? 'var(--emerald)' : 'var(--rose)', fontWeight: 700 }}>{order.paymentStatus}</span>
                         {order.paymentMethod === 'Split' && (order.cashAmount > 0 || order.onlineAmount > 0) && (
-                          <span style={{ color: 'var(--tx-tertiary)', marginLeft: 6 }}>
-                            (💵 ₹{order.cashAmount} cash + 📲 ₹{order.onlineAmount} online)
+                          <span style={{ color: 'var(--tx-tertiary)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                            (<Banknote size={10} style={{ opacity: 0.6 }} /> ₹{order.cashAmount} +
+                            <Smartphone size={10} style={{ opacity: 0.6 }} /> ₹{order.onlineAmount})
                           </span>
                         )}
                       </div>
-                      {order.discountAmount > 0 && <div>🏷️ Discount: -₹{order.discountAmount} ({order.discountPct}%)</div>}
+                      {order.discountAmount > 0 && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                          <Tag size={11} style={{ opacity: 0.5 }} />
+                          Discount: -₹{order.discountAmount} ({order.discountPct}%)
+                        </div>
+                      )}
                       {order.rackLocation && (
                         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, marginTop: 2, padding: '2px 10px', background: 'rgba(13,148,136,0.08)', border: '1px solid rgba(13,148,136,0.2)', borderRadius: 99, fontSize: 11, fontWeight: 700, color: 'var(--indigo)' }}>
-                          📦 Rack: {order.rackLocation}
+                          <Package size={11} /> Rack: {order.rackLocation}
                         </div>
                       )}
 
@@ -249,12 +281,13 @@ export default function Dashboard() {
 
                       <div className="action-row" style={{ marginTop: 10 }}>
                         {[
-                          { label: '✏️ Edit',    color: 'var(--indigo)', bg: 'var(--indigo-dim)', border: 'rgba(13,148,136,0.2)', action: e => { e.stopPropagation(); setEditOrder(order) } },
-                          { label: '🖨️ Receipt', color: 'var(--emerald)', bg: 'var(--emerald-dim)', border: 'rgba(16,185,129,0.2)', action: e => { e.stopPropagation(); printReceipt(order) } },
-                          { label: '🏷️ Tags',   color: 'var(--sky)', bg: 'rgba(14,165,233,0.1)', border: 'rgba(14,165,233,0.2)', action: e => { e.stopPropagation(); printTags(order) } },
-                          { label: '💳 Payment', color: 'var(--amber)', bg: 'var(--amber-dim)', border: 'rgba(245,158,11,0.2)', action: e => { e.stopPropagation(); setPaymentModal(order) } },
+                          { label: 'Edit',    icon: Pencil,  color: 'var(--indigo)',  bg: 'var(--indigo-dim)',  border: 'rgba(13,148,136,0.2)', action: e => { e.stopPropagation(); setEditOrder(order) } },
+                          { label: 'Receipt', icon: Printer, color: 'var(--emerald)', bg: 'var(--emerald-dim)', border: 'rgba(16,185,129,0.2)', action: e => { e.stopPropagation(); printReceipt(order) } },
+                          { label: 'Tags',    icon: Tag,     color: 'var(--sky)',     bg: 'rgba(14,165,233,0.1)', border: 'rgba(14,165,233,0.2)', action: e => { e.stopPropagation(); printTags(order) } },
+                          { label: 'Payment', icon: CreditCard, color: 'var(--amber)', bg: 'var(--amber-dim)', border: 'rgba(245,158,11,0.2)', action: e => { e.stopPropagation(); setPaymentModal(order) } },
                         ].map(btn => (
-                          <button key={btn.label} onClick={btn.action} style={{ padding: '6px 12px', borderRadius: 7, border: `1px solid ${btn.border}`, background: btn.bg, color: btn.color, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+                          <button key={btn.label} onClick={btn.action} style={{ padding: '6px 12px', borderRadius: 7, border: `1px solid ${btn.border}`, background: btn.bg, color: btn.color, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                            <btn.icon size={12} strokeWidth={2} />
                             {btn.label}
                           </button>
                         ))}
@@ -274,7 +307,7 @@ export default function Dashboard() {
       </Card>
 
       {/* Payment modal */}
-      <Modal open={!!paymentModal} onClose={() => setPaymentModal(null)} title="💳 Update Payment" maxWidth={400}>
+      <Modal open={!!paymentModal} onClose={() => setPaymentModal(null)} title="Update Payment" maxWidth={400}>
         {paymentModal && (
           <div>
             <div style={{ background: 'var(--bg-raised)', borderRadius: 10, padding: '12px 14px', marginBottom: 16, fontSize: 13 }}>
@@ -283,7 +316,11 @@ export default function Dashboard() {
               <span className="mono" style={{ fontWeight: 800, fontSize: 16, marginLeft: 'auto', float: 'right' }}>₹{paymentModal.grandTotal}</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {['Paid', 'Pending', 'Partial'].map(s => (
+              {[
+                { s: 'Paid',    icon: Check,       color: 'var(--emerald)' },
+                { s: 'Pending', icon: Clock,        color: 'var(--amber)'  },
+                { s: 'Partial', icon: AlertCircle,  color: 'var(--rose)'   },
+              ].map(({ s, icon: Icon, color }) => (
                 <button key={s} onClick={() => updatePayment(paymentModal, s)} style={{
                   padding: '12px 14px', borderRadius: 9,
                   border: `2px solid ${paymentModal.paymentStatus === s ? 'var(--indigo)' : 'var(--bd-subtle)'}`,
@@ -291,8 +328,10 @@ export default function Dashboard() {
                   color: paymentModal.paymentStatus === s ? 'var(--indigo)' : 'var(--tx-primary)',
                   fontWeight: 600, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit',
                   textAlign: 'left', transition: 'all 0.15s',
+                  display: 'flex', alignItems: 'center', gap: 8,
                 }}>
-                  {s === 'Paid' ? '✅' : s === 'Pending' ? '⏳' : '🔶'} {s}
+                  <Icon size={15} color={color} strokeWidth={2} />
+                  {s}
                   {paymentModal.paymentStatus === s ? ' (current)' : ''}
                 </button>
               ))}

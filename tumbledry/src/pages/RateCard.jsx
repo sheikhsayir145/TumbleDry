@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { GARMENT_CATEGORIES, GARMENT_RATES, SERVICE_KG_RATES } from '../lib/garments.js'
 import { Card, Modal } from '../components/ui/index.jsx'
+import { DollarSign, Scale, RotateCcw } from 'lucide-react'
 
 function loadRates() {
   try { const s = JSON.parse(localStorage.getItem('td-custom-rates') || '{}'); return { ...GARMENT_RATES, ...s } }
@@ -111,7 +112,7 @@ export default function RateCard() {
       {/* Header */}
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:20, flexWrap:'wrap', gap:12 }}>
         <div>
-          <h1 style={{ fontSize:20, fontWeight:800, color:'var(--tx-primary)', letterSpacing:'-0.4px' }}>💰 Rate Card Editor</h1>
+          <h1 style={{ fontSize:20, fontWeight:800, color:'var(--tx-primary)', letterSpacing:'-0.4px', display:'flex', alignItems:'center', gap:10 }}><DollarSign size={20} strokeWidth={2} /> Rate Card Editor</h1>
           <p style={{ fontSize:13, color:'var(--tx-secondary)', marginTop:3 }}>
             {Object.keys(rates).length} items
             {overrideCount > 0 && <span style={{color:'var(--amber)'}}> · {overrideCount} modified</span>}
@@ -119,8 +120,8 @@ export default function RateCard() {
           </p>
         </div>
         <div style={{ display:'flex', gap:8, flexShrink:0 }}>
-          <button onClick={resetAll} style={{ padding:'9px 14px', borderRadius:8, border:'1px solid rgba(244,63,94,0.25)', background:'rgba(244,63,94,0.08)', color:'var(--rose)', fontFamily:'inherit', fontWeight:600, fontSize:13, cursor:'pointer' }}>
-            ↩️ Reset All
+          <button onClick={resetAll} style={{ padding:'9px 14px', borderRadius:8, border:'1px solid rgba(244,63,94,0.25)', background:'rgba(244,63,94,0.08)', color:'var(--rose)', fontFamily:'inherit', fontWeight:600, fontSize:13, cursor:'pointer', display:'flex', alignItems:'center', gap:5 }}>
+            <RotateCcw size={13} strokeWidth={2} /> Reset All
           </button>
           <button onClick={()=>setAddModal(true)} style={{ padding:'9px 14px', borderRadius:8, border:'none', background:'linear-gradient(135deg,#10b981,#059669)', color:'white', fontFamily:'inherit', fontWeight:700, fontSize:13, cursor:'pointer', boxShadow:'0 2px 8px rgba(16,185,129,0.2)' }}>
             + Add Item
@@ -131,7 +132,7 @@ export default function RateCard() {
       {/* KG Service Rates */}
       <Card style={{ marginBottom:16, padding:0, overflow:'hidden' }}>
         <div style={{ padding:'12px 18px', background:'var(--bg-raised)', borderBottom:'1px solid var(--bd-subtle)', display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:8 }}>
-          <div style={{ fontSize:13, fontWeight:800, color:'var(--tx-primary)' }}>⚖️ KG Service Rates</div>
+          <div style={{ fontSize:13, fontWeight:800, color:'var(--tx-primary)', display:'flex', alignItems:'center', gap:6 }}><Scale size={14} strokeWidth={2} /> KG Service Rates</div>
           <div style={{ fontSize:11, color:'var(--tx-secondary)' }}>Auto-applied when KG service is selected in POS</div>
         </div>
         <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(240px,1fr))' }}>

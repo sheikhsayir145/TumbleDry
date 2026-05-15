@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useStore } from '../store/index.js'
 import { api } from '../lib/api.js'
 import { Card, Spinner } from '../components/ui/index.jsx'
+import { FileText, Download, Upload, ClipboardList, AlertTriangle, Printer } from 'lucide-react'
 
 export default function Reports() {
   const { orders, ordersLoading, fetchOrders } = useStore()
@@ -187,15 +188,15 @@ export default function Reports() {
 
   return (
     <div className="page">
-      <h1 style={{ fontSize:20, fontWeight:800, marginBottom:20, color:'var(--tx-primary)', letterSpacing:'-0.4px' }}>
-        📄 Reports
+      <h1 style={{ fontSize:20, fontWeight:800, marginBottom:20, color:'var(--tx-primary)', letterSpacing:'-0.4px', display:'flex', alignItems:'center', gap:10 }}>
+        <FileText size={20} strokeWidth={2} /> Reports
       </h1>
 
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(300px, 1fr))', gap:16 }}>
 
         {/* CSV Export */}
         <Card>
-          <div style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.7px', color:'var(--tx-tertiary)', marginBottom:18 }}>📥 Export to CSV</div>
+          <div style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.7px', color:'var(--tx-tertiary)', marginBottom:18, display:'flex', alignItems:'center', gap:6 }}><Download size={12} /> Export to CSV</div>
           <div style={{ marginBottom:12 }}>
             <label style={lbl}>From Date</label>
             <input type="date" style={inp} value={fromDate} onChange={e=>setFromDate(e.target.value)} />
@@ -207,8 +208,8 @@ export default function Reports() {
           <div style={{ padding:'10px 14px', background:'var(--bg-raised)', borderRadius:8, marginBottom:16, fontSize:13, color:'var(--tx-secondary)', border:'1px solid var(--bd-subtle)' }}>
             <strong style={{color:'var(--tx-primary)'}}>{rangeOrds.length} orders</strong> · ₹{rangeRev.toLocaleString()} revenue in range
           </div>
-          <button onClick={exportCSV} style={{ width:'100%', padding:12, background:'linear-gradient(135deg,#0284c7,#38bdf8)', color:'white', border:'none', borderRadius:10, fontFamily:'inherit', fontWeight:700, fontSize:14, cursor:'pointer', boxShadow:'0 4px 14px rgba(56,189,248,0.25)' }}>
-            📥 Download CSV
+          <button onClick={exportCSV} style={{ width:'100%', padding:12, background:'linear-gradient(135deg,#0284c7,#38bdf8)', color:'white', border:'none', borderRadius:10, fontFamily:'inherit', fontWeight:700, fontSize:14, cursor:'pointer', boxShadow:'0 4px 14px rgba(56,189,248,0.25)', display:'flex', alignItems:'center', justifyContent:'center', gap:7 }}>
+            <Download size={15} strokeWidth={2.5} /> Download CSV
           </button>
           <div style={{ marginTop:12, fontSize:12, color:'var(--tx-tertiary)', lineHeight:1.6 }}>
             Exports all order fields. Opens directly in Excel or Google Sheets.
@@ -217,14 +218,17 @@ export default function Reports() {
 
         {/* CSV Import */}
         <Card>
-          <div style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.7px', color:'var(--tx-tertiary)', marginBottom:18 }}>📤 Import from CSV</div>
-          <div style={{ padding:'12px 14px', background:'var(--bg-raised)', borderRadius:8, marginBottom:16, fontSize:13, color:'var(--tx-secondary)', border:'1px solid var(--bd-subtle)', lineHeight:1.7 }}>
-            <strong style={{color:'var(--tx-primary)'}}>⚠️ Warning:</strong> This will <strong style={{color:'var(--rose)'}}>replace ALL existing orders</strong>. Use only for initial migration.
+          <div style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.7px', color:'var(--tx-tertiary)', marginBottom:18, display:'flex', alignItems:'center', gap:6 }}><Upload size={12} /> Import from CSV</div>
+          <div style={{ padding:'12px 14px', background:'var(--bg-raised)', borderRadius:8, marginBottom:16, fontSize:13, color:'var(--tx-secondary)', border:'1px solid var(--bd-subtle)', lineHeight:1.7, display:'flex', alignItems:'flex-start', gap:8 }}>
+            <AlertTriangle size={13} style={{flexShrink:0, color:'var(--amber)'}} /> <span><strong style={{color:'var(--tx-primary)'}}>Warning:</strong> This will <strong style={{color:'var(--rose)'}}>replace ALL existing orders</strong>. Use only for initial migration.</span>
           </div>
           <label style={{ display:'block', cursor:'pointer' }}>
             <input type="file" accept=".csv" onChange={handleImportCSV} style={{display:'none'}} disabled={importing} />
             <div style={{ width:'100%', padding:12, background: importing ? 'var(--bg-raised)' : 'linear-gradient(135deg,var(--indigo),#14B8A6)', color: importing ? 'var(--tx-secondary)' : 'white', border: importing ? '1px solid var(--bd-subtle)' : 'none', borderRadius:10, fontFamily:'inherit', fontWeight:700, fontSize:14, cursor: importing ? 'not-allowed' : 'pointer', boxShadow: importing ? 'none' : '0 4px 14px rgba(13,148,136,0.25)', textAlign:'center', boxSizing:'border-box' }}>
-              {importing ? '⏳ Importing...' : '📤 Choose CSV File to Import'}
+              <span style={{display:'flex', alignItems:'center', justifyContent:'center', gap:7}}>
+                <Upload size={15} strokeWidth={2.5} />
+                {importing ? 'Importing...' : 'Choose CSV File to Import'}
+              </span>
             </div>
           </label>
           {importResult && (
@@ -246,7 +250,7 @@ export default function Reports() {
 
         {/* Daily Closing Report */}
         <Card>
-          <div style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.7px', color:'var(--tx-tertiary)', marginBottom:18 }}>📋 Daily Closing Report</div>
+          <div style={{ fontSize:11, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.7px', color:'var(--tx-tertiary)', marginBottom:18, display:'flex', alignItems:'center', gap:6 }}><ClipboardList size={12} /> Daily Closing Report</div>
           <div style={{ marginBottom:16 }}>
             <label style={lbl}>Report Date</label>
             <input type="date" style={inp} value={reportDate} onChange={e=>setReportDate(e.target.value)} />
@@ -281,8 +285,8 @@ export default function Reports() {
             )}
           </div>
 
-          <button onClick={printReport} style={{ width:'100%', padding:12, background:'linear-gradient(135deg,#d97706,#f59e0b)', color:'white', border:'none', borderRadius:10, fontFamily:'inherit', fontWeight:700, fontSize:14, cursor:'pointer', boxShadow:'0 4px 14px rgba(245,158,11,0.25)' }}>
-            🖨️ Print / Save as PDF
+          <button onClick={printReport} style={{ width:'100%', padding:12, background:'linear-gradient(135deg,#d97706,#f59e0b)', color:'white', border:'none', borderRadius:10, fontFamily:'inherit', fontWeight:700, fontSize:14, cursor:'pointer', boxShadow:'0 4px 14px rgba(245,158,11,0.25)', display:'flex', alignItems:'center', justifyContent:'center', gap:7 }}>
+            <Printer size={15} strokeWidth={2.5} /> Print / Save as PDF
           </button>
         </Card>
       </div>
