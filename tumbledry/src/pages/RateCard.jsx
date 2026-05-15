@@ -212,7 +212,7 @@ export default function RateCard() {
             <div><label style={lbl}>New Price per KG (₹)</label><input style={inp} type="number" min="1" value={editKgPrice} onChange={e=>setEditKgPrice(e.target.value)} onKeyDown={e=>e.key==='Enter'&&saveEditKg()} autoFocus /></div>
             <div style={{ display:'flex', gap:10 }}>
               <button onClick={()=>setEditKg(null)} style={{ flex:1, padding:11, background:'var(--bg-raised)', border:'1px solid var(--bd-subtle)', borderRadius:8, fontFamily:'inherit', fontWeight:600, cursor:'pointer', color:'var(--tx-secondary)' }}>Cancel</button>
-              <button onClick={saveEditKg} style={{ flex:2, padding:11, background:'linear-gradient(135deg,var(--indigo),#14B8A6)', color:'white', border:'none', borderRadius:8, fontFamily:'inherit', fontWeight:700, cursor:'pointer' }}>Save Rate</button>
+              <button onClick={saveEditKg} style={{ flex:2, padding:11, background:'linear-gradient(135deg,#72BF2C,#8DD446)', color:'white', border:'none', borderRadius:8, fontFamily:'inherit', fontWeight:700, cursor:'pointer' }}>Save Rate</button>
             </div>
           </div>
         )}
@@ -229,7 +229,7 @@ export default function RateCard() {
             <div><label style={lbl}>New Price (₹)</label><input style={inp} type="number" min="1" value={editPrice} onChange={e=>setEditPrice(e.target.value)} onKeyDown={e=>e.key==='Enter'&&saveEdit()} autoFocus /></div>
             <div style={{ display:'flex', gap:10 }}>
               <button onClick={()=>setEditItem(null)} style={{ flex:1, padding:11, background:'var(--bg-raised)', border:'1px solid var(--bd-subtle)', borderRadius:8, fontFamily:'inherit', fontWeight:600, cursor:'pointer', color:'var(--tx-secondary)' }}>Cancel</button>
-              <button onClick={saveEdit} style={{ flex:2, padding:11, background:'linear-gradient(135deg,var(--indigo),#14B8A6)', color:'white', border:'none', borderRadius:8, fontFamily:'inherit', fontWeight:700, cursor:'pointer' }}>Save Price</button>
+              <button onClick={saveEdit} style={{ flex:2, padding:11, background:'linear-gradient(135deg,#72BF2C,#8DD446)', color:'white', border:'none', borderRadius:8, fontFamily:'inherit', fontWeight:700, cursor:'pointer' }}>Save Price</button>
             </div>
           </div>
         )}

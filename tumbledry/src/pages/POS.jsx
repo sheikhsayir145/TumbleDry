@@ -510,7 +510,7 @@ export default function POS() {
             <button onClick={processOrder} style={{
               width: '100%', padding: 14, borderRadius: 10, border: 'none', cursor: 'pointer',
               fontFamily: 'inherit', fontWeight: 800, fontSize: 14,
-              background: 'linear-gradient(135deg, #0D9488, #14B8A6)',
+              background: 'linear-gradient(135deg, #72BF2C, #8DD446)',
               color: 'white', boxShadow: 'var(--shadow-teal)',
               letterSpacing: '0.1px',
             }}>

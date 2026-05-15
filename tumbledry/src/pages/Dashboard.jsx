@@ -25,7 +25,7 @@ const STATUS_COLORS = {
   pending:   { bg: 'rgba(245,158,11,0.12)',  color: '#D97706' },
   inprocess: { bg: 'rgba(14,165,233,0.12)',  color: '#0369A1' },
   completed: { bg: 'rgba(16,185,129,0.12)',  color: '#059669' },
-  delivered: { bg: 'rgba(13,148,136,0.12)',  color: '#0D9488' },
+  delivered: { bg: 'rgba(114,191,44,0.12)',  color: '#5FAD1A' },
 }
 
 export default function Dashboard() {
@@ -109,7 +109,7 @@ export default function Dashboard() {
     },
     { label: 'Orders',    value: totalOrders.toLocaleString(),     sub: 'Total orders',     gradient: 'linear-gradient(135deg, #0284C7, #0EA5E9)', shadow: '0 4px 20px rgba(14,165,233,0.25)' },
     { label: 'Garments',  value: totalGarments.toLocaleString(),   sub: 'Total garments',   gradient: 'linear-gradient(135deg, #059669, #10B981)', shadow: '0 4px 20px rgba(16,185,129,0.25)' },
-    { label: 'Customers', value: uniqueCustomers.toLocaleString(), sub: 'Unique customers', gradient: 'linear-gradient(135deg, #0D9488, #14B8A6)', shadow: 'var(--shadow-teal)' },
+    { label: 'Customers', value: uniqueCustomers.toLocaleString(), sub: 'Unique customers', gradient: 'linear-gradient(135deg, #72BF2C, #8DD446)', shadow: 'var(--shadow-teal)' },
   ]
 
   if (ordersLoading) return <div style={{ display: 'flex', justifyContent: 'center', padding: 80 }}><Spinner size={40} /></div>

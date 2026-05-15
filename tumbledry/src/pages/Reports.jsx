@@ -224,7 +224,7 @@ export default function Reports() {
           </div>
           <label style={{ display:'block', cursor:'pointer' }}>
             <input type="file" accept=".csv" onChange={handleImportCSV} style={{display:'none'}} disabled={importing} />
-            <div style={{ width:'100%', padding:12, background: importing ? 'var(--bg-raised)' : 'linear-gradient(135deg,var(--indigo),#14B8A6)', color: importing ? 'var(--tx-secondary)' : 'white', border: importing ? '1px solid var(--bd-subtle)' : 'none', borderRadius:10, fontFamily:'inherit', fontWeight:700, fontSize:14, cursor: importing ? 'not-allowed' : 'pointer', boxShadow: importing ? 'none' : '0 4px 14px rgba(13,148,136,0.25)', textAlign:'center', boxSizing:'border-box' }}>
+            <div style={{ width:'100%', padding:12, background: importing ? 'var(--bg-raised)' : 'linear-gradient(135deg,#72BF2C,#8DD446)', color: importing ? 'var(--tx-secondary)' : 'white', border: importing ? '1px solid var(--bd-subtle)' : 'none', borderRadius:10, fontFamily:'inherit', fontWeight:700, fontSize:14, cursor: importing ? 'not-allowed' : 'pointer', boxShadow: importing ? 'none' : '0 4px 14px rgba(114,191,44,0.28)', textAlign:'center', boxSizing:'border-box' }}>
               <span style={{display:'flex', alignItems:'center', justifyContent:'center', gap:7}}>
                 <Upload size={15} strokeWidth={2.5} />
                 {importing ? 'Importing...' : 'Choose CSV File to Import'}

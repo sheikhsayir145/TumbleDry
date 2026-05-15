@@ -9,7 +9,7 @@ const STATUS_COLORS = {
   pending:   { bg: 'rgba(245,158,11,0.12)',  color: '#D97706' },
   inprocess: { bg: 'rgba(14,165,233,0.12)',  color: '#0369A1' },
   completed: { bg: 'rgba(16,185,129,0.12)',  color: '#059669' },
-  delivered: { bg: 'rgba(13,148,136,0.12)',  color: '#0D9488' },
+  delivered: { bg: 'rgba(114,191,44,0.12)',  color: '#5FAD1A' },
 }
 
 export default function CustomerProfiles() {

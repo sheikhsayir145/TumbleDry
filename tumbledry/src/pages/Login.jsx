@@ -206,7 +206,7 @@ export default function Login({ onLogin }) {
                 padding: '14px',
                 background: loading || !storeId || !password
                   ? 'var(--bg-raised)'
-                  : 'linear-gradient(135deg, #0D9488, #14B8A6)',
+                  : 'linear-gradient(135deg, #72BF2C, #8DD446)',
                 color: loading || !storeId || !password
                   ? 'var(--tx-tertiary)'
                   : 'white',

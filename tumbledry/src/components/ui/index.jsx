@@ -49,7 +49,7 @@ export function Button({ children, variant = 'primary', size = 'md', className, 
 
   const variants = {
     primary: {
-      background: 'linear-gradient(135deg, #0D9488, #14B8A6)',
+      background: 'linear-gradient(135deg, #72BF2C, #8DD446)',
       color: 'white',
       boxShadow: 'var(--shadow-teal)',
     },
@@ -182,8 +182,8 @@ export function Select({ label, children, style, ...props }) {
 /* ── Badge ── */
 export function Badge({ children, color = 'teal' }) {
   const colors = {
-    teal:    { bg: 'rgba(13,148,136,0.12)',  color: '#0D9488', border: 'rgba(13,148,136,0.2)'  },
-    indigo:  { bg: 'rgba(13,148,136,0.12)',  color: '#0D9488', border: 'rgba(13,148,136,0.2)'  },
+    teal:    { bg: 'rgba(114,191,44,0.12)',  color: '#5FAD1A', border: 'rgba(114,191,44,0.25)'  },
+    indigo:  { bg: 'rgba(114,191,44,0.12)',  color: '#5FAD1A', border: 'rgba(114,191,44,0.25)'  },
     amber:   { bg: 'rgba(245,158,11,0.12)',  color: '#B45309', border: 'rgba(245,158,11,0.2)'  },
     emerald: { bg: 'rgba(16,185,129,0.12)',  color: '#059669', border: 'rgba(16,185,129,0.2)'  },
     rose:    { bg: 'rgba(244,63,94,0.10)',   color: '#E11D48', border: 'rgba(244,63,94,0.2)'   },

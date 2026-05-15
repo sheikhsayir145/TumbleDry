@@ -15,8 +15,8 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointEleme
 
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 
-const TEAL = '#0D9488'
-const TEAL_RGBA = (a) => `rgba(13,148,136,${a})`
+const TEAL = '#72BF2C'
+const TEAL_RGBA = (a) => `rgba(114,191,44,${a})`
 const AMBER_RGBA = (a) => `rgba(245,158,11,${a})`
 const EMERALD_RGBA = (a) => `rgba(16,185,129,${a})`
 
@@ -329,7 +329,7 @@ export default function Analytics() {
                     <div style={{ fontSize:13, fontWeight:700, color:'var(--tx-primary)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{c.name}</div>
                     <div style={{ fontSize:11, color:'var(--tx-secondary)', marginTop:1 }}>{c.phone} · {c.orders} orders</div>
                     <div style={{ height:3, background:'var(--bd-subtle)', borderRadius:99, marginTop:5 }}>
-                      <div style={{ height:3, background:`linear-gradient(90deg, ${TEAL}, #14B8A6)`, borderRadius:99, width:`${c.total/maxSpend*100}%`, transition:'width 0.4s' }} />
+                      <div style={{ height:3, background:`linear-gradient(90deg, ${TEAL}, #8DD446)`, borderRadius:99, width:`${c.total/maxSpend*100}%`, transition:'width 0.4s' }} />
                     </div>
                   </div>
                   <div className="mono" style={{ fontSize:13, fontWeight:700, color:'var(--indigo)', flexShrink:0 }}>₹{c.total.toLocaleString()}</div>

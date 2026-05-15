@@ -157,7 +157,7 @@ export default function EditOrder({ order, onClose }) {
           <button onClick={onClose} style={{ flex:1, padding:12, background:'var(--bg-raised)', border:'1px solid var(--bd-subtle)', borderRadius:9, fontFamily:'inherit', fontWeight:600, cursor:'pointer', color:'var(--tx-secondary)', fontSize:13 }}>
             Cancel
           </button>
-          <button onClick={save} disabled={saving} style={{ flex:2, padding:12, background:'linear-gradient(135deg,var(--indigo),#14B8A6)', color:'white', border:'none', borderRadius:9, fontFamily:'inherit', fontWeight:700, cursor:saving?'not-allowed':'pointer', fontSize:14, opacity:saving?0.7:1 }}>
+          <button onClick={save} disabled={saving} style={{ flex:2, padding:12, background:'linear-gradient(135deg,#72BF2C,#8DD446)', color:'white', border:'none', borderRadius:9, fontFamily:'inherit', fontWeight:700, cursor:saving?'not-allowed':'pointer', fontSize:14, opacity:saving?0.7:1 }}>
             {saving ? '⏳ Saving...' : '✅ Save Changes'}
           </button>
         </div>
