@@ -188,7 +188,7 @@ export default function POS() {
     const discLine = order.discountAmount > 0
       ? `\n━━━━━━━━━━━━━━━━━━\n💸 *Original:* ₹${order.grandTotal+order.discountAmount}\n🏷️ *Discount (${order.discountPct}%):* -₹${order.discountAmount}\n✅ *Bill after discount:* ₹${order.grandTotal}\n━━━━━━━━━━━━━━━━━━`
       : ''
-    const msg = `Hello ${order.customerName}, we have received your laundry order! 👕\n\n🏷️ *Tag #:* ${order.tagNumber}\n👕 *Garments:* ${order.totalGarments}\n\n*Items:*\n${items}${discLine}\n\n💰 *Total Bill: ₹${order.grandTotal}*\n📅 *Delivery By:* ${order.deliveryDate}\n\nThank you for choosing Tumbledry! 🙏`
+    const msg = `Hello ${order.customerName}, we have received your laundry order! 👕\n\n🏷️ *Tag #:* ${order.tagNumber}\n👕 *Garments:* ${order.totalGarments}\n\n*Items:*\n${items}${discLine}\n\n💰 *Total Bill: ₹${order.grandTotal}*\n📅 *Delivery By:* ${order.deliveryDate}\n\n━━━━━━━━━━━━━━━━━━\n📍 *Banday Lane, Dargah Hazratbal, 190006*\n📞 *8899912859*\n📸 *Instagram:* https://www.instagram.com/tumbledryhazratbal?igsh=OGw2NTFyZmI4dmpi\n━━━━━━━━━━━━━━━━━━\n\nThank you for choosing Tumbledry! 🙏`
     window.open(`https://web.whatsapp.com/send?phone=91${order.customerNumber}&text=${encodeURIComponent(msg)}`, '_blank')
   }
 

@@ -96,7 +96,7 @@ export default function Dashboard() {
   }
 
   function sendReadyWhatsApp(order) {
-    const msg = `Hello ${order.customerName}! 👋\n\nYour laundry is *ready for pickup* ✅\n\n🏷️ *Tag #:* ${order.tagNumber}\n👕 *Garments:* ${order.totalGarments}\n💰 *Amount:* ₹${order.grandTotal}\n\nPlease visit us to collect your order.\n\nThank you for choosing Tumbledry! 🙏`
+    const msg = `Hello ${order.customerName}! 👋\n\nYour laundry is *ready for pickup* ✅\n\n🏷️ *Tag #:* ${order.tagNumber}\n👕 *Garments:* ${order.totalGarments}\n💰 *Amount:* ₹${order.grandTotal}\n\nPlease visit us to collect your order.\n\n━━━━━━━━━━━━━━━━━━\n📍 *Banday Lane, Dargah Hazratbal, 190006*\n📞 *8899912859*\n📸 *Instagram:* https://www.instagram.com/tumbledryhazratbal?igsh=OGw2NTFyZmI4dmpi\n━━━━━━━━━━━━━━━━━━\n\n⭐ *Loved our service? Leave us a review:*\nhttps://share.google/Ks8Li9bHkiT3Aiixz\n\nThank you for choosing Tumbledry! 🙏`
     window.open(`https://web.whatsapp.com/send?phone=91${order.customerNumber}&text=${encodeURIComponent(msg)}`, '_blank')
   }
 
