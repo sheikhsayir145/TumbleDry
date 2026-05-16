@@ -495,17 +495,23 @@ export default function POS() {
 
             {/* Bill summary */}
             <div style={{ background: 'linear-gradient(135deg, rgba(13,148,136,0.07), rgba(13,148,136,0.03))', border: '1.5px solid rgba(13,148,136,0.2)', borderRadius: 12, padding: '16px 18px', marginBottom: 16 }}>
-              {totalDiscount > 0 && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--rose)', marginBottom: 6 }}>
-                  <span>Total Discount</span>
-                  <span className="mono" style={{ fontWeight: 700 }}>-₹{totalDiscount.toLocaleString()}</span>
-                </div>
-              )}
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--tx-secondary)', marginBottom: 8 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--tx-secondary)', marginBottom: 6 }}>
                 <span>Total Garments</span>
                 <span style={{ fontWeight: 700, color: 'var(--tx-primary)' }}>{totalGarments}</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              {totalDiscount > 0 && (
+                <>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--tx-tertiary)', marginBottom: 4 }}>
+                    <span>Original Amount</span>
+                    <span className="mono" style={{ fontWeight: 600, textDecoration: 'line-through' }}>₹{cartGross.toLocaleString()}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--rose)', marginBottom: 6 }}>
+                    <span>Discount</span>
+                    <span className="mono" style={{ fontWeight: 700 }}>-₹{totalDiscount.toLocaleString()}</span>
+                  </div>
+                </>
+              )}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: totalDiscount > 0 ? '1px dashed rgba(13,148,136,0.25)' : 'none', paddingTop: totalDiscount > 0 ? 10 : 0, marginTop: totalDiscount > 0 ? 4 : 0 }}>
                 <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--tx-secondary)' }}>Grand Total</span>
                 <span key={cartRevision} className="mono cart-bump" style={{ fontSize: 32, fontWeight: 800, color: 'var(--indigo)', letterSpacing: '-1px' }}>₹{grandTotal.toLocaleString()}</span>
               </div>

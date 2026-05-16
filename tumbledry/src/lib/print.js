@@ -14,6 +14,10 @@ function getServiceCode(serviceType) {
 }
 
 export function printReceipt(order) {
+  const originalAmt = order.grandTotal + (order.discountAmount || 0)
+  const subtotalRow = order.discountAmount > 0
+    ? `<tr><td colspan="3" style="padding:3px 0;border-bottom:1px dashed #eee;font-size:11px;color:#888;">Original Amount</td><td style="text-align:right;padding:3px 0;border-bottom:1px dashed #eee;font-size:11px;color:#888;text-decoration:line-through;">₹${originalAmt}</td></tr>`
+    : ''
   const discLine = order.discountAmount > 0
     ? `<tr><td colspan="3" style="color:#dc2626;padding:3px 0;border-bottom:1px dashed #eee;">Discount (${order.discountPct}%)</td><td style="text-align:right;color:#dc2626;padding:3px 0;border-bottom:1px dashed #eee;">-₹${order.discountAmount}</td></tr>`
     : ''
@@ -40,7 +44,9 @@ export function printReceipt(order) {
       @media print { @page { size:75mm auto; margin:0; } body { padding:4mm; } }
     </style></head><body>
     <div class="center bold" style="font-size:18px;margin-bottom:2px;">TUMBLEDRY</div>
-    <div class="center" style="font-size:11px;color:#555;margin-bottom:8px;">Premium Laundry Services</div>
+    <div class="center" style="font-size:11px;color:#555;margin-bottom:2px;">Premium Laundry Services</div>
+    <div class="center" style="font-size:10px;color:#555;margin-bottom:1px;">Banday Lane, Dargah Hazratbal, 190006</div>
+    <div class="center" style="font-size:10px;color:#555;margin-bottom:8px;">Ph: 8899912859</div>
     <div class="divider"></div>
     <div style="margin-bottom:6px;">
       <div class="bold" style="font-size:14px;">${order.customerName}</div>
@@ -63,6 +69,7 @@ export function printReceipt(order) {
       </tr></thead>
       <tbody>
         ${itemRows}
+        ${subtotalRow}
         ${discLine}
         <tr class="total-row">
           <td colspan="3" class="bold">TOTAL</td>
@@ -315,6 +322,10 @@ export function printTagsInWindow(win, order) {
 export function printReceiptInWindow(win, order) {
   if (!win) return
 
+  const originalAmt = order.grandTotal + (order.discountAmount || 0)
+  const subtotalRow = order.discountAmount > 0
+    ? `<tr><td colspan="3" style="padding:3px 0;border-bottom:1px dashed #eee;font-size:11px;color:#888;">Original Amount</td><td style="text-align:right;padding:3px 0;border-bottom:1px dashed #eee;font-size:11px;color:#888;text-decoration:line-through;">₹${originalAmt}</td></tr>`
+    : ''
   const discLine = order.discountAmount > 0
     ? `<tr><td colspan="3" style="color:#dc2626;padding:3px 0;border-bottom:1px dashed #eee;">Discount (${order.discountPct}%)</td><td style="text-align:right;color:#dc2626;padding:3px 0;border-bottom:1px dashed #eee;">-₹${order.discountAmount}</td></tr>`
     : ''
@@ -340,7 +351,9 @@ export function printReceiptInWindow(win, order) {
       @media print { @page { size:75mm auto; margin:0; } body { padding:4mm; } }
     </style></head><body>
     <div class="center bold" style="font-size:18px;margin-bottom:2px;">TUMBLEDRY</div>
-    <div class="center" style="font-size:11px;color:#555;margin-bottom:8px;">Premium Laundry Services</div>
+    <div class="center" style="font-size:11px;color:#555;margin-bottom:2px;">Premium Laundry Services</div>
+    <div class="center" style="font-size:10px;color:#555;margin-bottom:1px;">Banday Lane, Dargah Hazratbal, 190006</div>
+    <div class="center" style="font-size:10px;color:#555;margin-bottom:8px;">Ph: 8899912859</div>
     <div class="divider"></div>
     <div style="margin-bottom:6px;">
       <div class="bold" style="font-size:14px;">${order.customerName}</div>
@@ -363,6 +376,7 @@ export function printReceiptInWindow(win, order) {
       </tr></thead>
       <tbody>
         ${itemRows}
+        ${subtotalRow}
         ${discLine}
         <tr class="total-row">
           <td colspan="3" class="bold">TOTAL</td>
