@@ -1,7 +1,7 @@
 // src/lib/api.js — All Netlify Function calls
 
 const BASE = '/.netlify/functions'
-const SECRET = import.meta.env.VITE_API_SECRET || 'tumbledry2026'
+const SECRET = import.meta.env.VITE_API_SECRET
 
 const headers = {
   'Content-Type': 'application/json',
